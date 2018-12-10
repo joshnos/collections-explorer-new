@@ -1,4 +1,4 @@
-package de.heidelberg.collectionexplorer;
+package de.heidelberg.collectionsexplorer;
 
 import java.util.Comparator;
 import java.util.Map;

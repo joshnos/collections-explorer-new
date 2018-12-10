@@ -1,4 +1,4 @@
-package de.heidelberg.collectionexplorer;
+package de.heidelberg.collectionsexplorer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +13,7 @@ import java.util.List;
 public class Result {
 	
 	private String fileAbsolutePath;
-	private List<CollectionInfoBean> new_statements = null;
+	private List<CollectionsInfo> new_statements = null;
 	
 	/**
 	 * Create a new Result. Each result has an associated .java source file
@@ -27,10 +27,10 @@ public class Result {
 	 */
 	Result(String fileName, int index) {
 		this.fileAbsolutePath = fileName;
-		 new_statements = new ArrayList<CollectionInfoBean>();
+		 new_statements = new ArrayList<CollectionsInfo>();
 	}
 	
-	public void add(CollectionInfoBean bean) {
+	public void add(CollectionsInfo bean) {
 		new_statements.add(bean);
 	}
 	
@@ -40,7 +40,7 @@ public class Result {
 		else return true;
 	}
 	
-	public List<CollectionInfoBean> getEntries() {
+	public List<CollectionsInfo> getEntries() {
 		return new_statements;
 	}
 	
@@ -53,7 +53,7 @@ public class Result {
 	public String toString() {
 		StringBuilder s = new StringBuilder();
 		s.append(this.fileAbsolutePath + "\n");
-		for(CollectionInfoBean bean : new_statements)
+		for(CollectionsInfo bean : new_statements)
 			s.append(bean.toString());
 		s.append("\n");
 		return s.toString();

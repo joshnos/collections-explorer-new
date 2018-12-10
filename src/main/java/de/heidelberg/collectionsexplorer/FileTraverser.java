@@ -1,4 +1,4 @@
-package de.heidelberg.collectionexplorer;
+package de.heidelberg.collectionsexplorer;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -24,12 +24,15 @@ public class FileTraverser {
 	public static List<File> visitAllDirsAndFiles(File file, String fileExtension) {
 
 		List<File> files = new ArrayList<>();
-		if (file.isDirectory())  // directory
-			for (String child : file.list())
+		if (file.isDirectory())  {
+			for (String child : file.list()) {
 				files.addAll(visitAllDirsAndFiles(new File(file, child), fileExtension));
-	    else // file
-			if (file.getName().endsWith(fileExtension))
+			}
+		} else {
+			if (file.getName().endsWith(fileExtension)) {
 				files.add(file);
+			}
+		}
 		return files;
 	}
 }

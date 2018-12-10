@@ -1,7 +1,8 @@
-package de.heidelberg.collectionexplorer;
+package de.heidelberg.collectionsexplorer;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.nio.charset.Charset;
 
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
@@ -59,7 +60,7 @@ public class FileProcessor {
 			in = new FileInputStream(f.getAbsolutePath());
 			CompilationUnit cu;
 			try {
-				cu = JavaParser.parse(in, UTF_8);
+				cu = JavaParser.parse(in, Charset.forName("UTF-8"));
 			} catch (Error e) {
 				System.out.println(String.format("Critical Javaparser error while processing the file %s.", f.getName()));
 				return null;

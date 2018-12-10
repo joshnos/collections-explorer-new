@@ -1,4 +1,4 @@
-package de.heidelberg.collectionexplorer;
+package de.heidelberg.collectionsexplorer;
 
 import java.util.ArrayList;
 import java.util.List;

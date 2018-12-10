@@ -1,4 +1,4 @@
-package de.heidelberg.collectionexplorer;
+package de.heidelberg.collectionsexplorer;
 
 
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
@@ -20,7 +20,7 @@ public class MyEditor extends VoidVisitorAdapter<Result> {
 		super.visit(n, ret);
 	}
 
-	private CollectionInfoBean parse(ObjectCreationExpr n) {
+	private CollectionsInfo parse(ObjectCreationExpr n) {
 		// TODO Auto-generated method stub
 		return null;
 	}
