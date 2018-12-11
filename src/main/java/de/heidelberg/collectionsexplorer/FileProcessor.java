@@ -7,6 +7,8 @@ import java.nio.charset.Charset;
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 
+import de.heidelberg.collectionsexplorer.visitors.ObjectCreationVisitor;
+
 /**
  * File processor provides the logic for parsing either a file or a path using
  * JavaParser. When it encounters a file, it will call the MyVisitor function,
@@ -22,11 +24,6 @@ public class FileProcessor {
 	
 	private static FileProcessor instance = null;
 	private static final String UTF_8 = "utf-8";
-	/**
-	 * file_ID is currently unused and will be relevant later, when the 'edit
-	 * compilation unit' logic will be added.
-	 */
-	private static int file_ID = 0;
 	private Filter filter;
 	
 	protected FileProcessor(Filter filter) {
@@ -60,19 +57,18 @@ public class FileProcessor {
 			in = new FileInputStream(f.getAbsolutePath());
 			CompilationUnit cu;
 			try {
-				cu = JavaParser.parse(in, Charset.forName("UTF-8"));
+				cu = JavaParser.parse(in, Charset.forName(UTF_8));
 			} catch (Error e) {
 				System.out.println(String.format("Critical Javaparser error while processing the file %s.", f.getName()));
 				return null;
 			}
-			result = new Result(f.getAbsolutePath(), file_ID);
-			cu.accept(new MyVisitor(filter), result);
+			result = new Result(f.getAbsolutePath());
+			cu.accept(new ObjectCreationVisitor(filter), result);
 			in.close();
 		} catch (Exception e) {
 			// We can ignore small errors here
 			System.out.println(String.format("Error while processing the file %s.", f.getName()));
 		}
-		file_ID++;
 		return result;
 	}
 }
