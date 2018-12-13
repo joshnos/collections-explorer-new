@@ -40,7 +40,7 @@ public class CollectionsExplorer implements Callable<Void>{
 	@Parameters(index="0", arity = "1..*", paramLabel= "dir", description="Input directory where the explorer will retrieve collections usage")
 	private File[] inputDirectories;
 	
-	@Option(arity = "1", names= {"out"}, paramLabel= "out", description="Directory where the report will be saved")
+	@Option(arity = "1", names= {"-out"}, paramLabel= "out", description="Directory where the report will be saved")
 	private File outputDirectory;
 	
 	public static void main(String[] args) {
