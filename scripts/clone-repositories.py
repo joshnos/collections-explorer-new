@@ -9,7 +9,6 @@ import numpy as np
 
 COUNT = 0
 
-
 def clone_repository(df, repo_folder, user, pwd):
     global COUNT
 
@@ -45,9 +44,27 @@ def clone_repository(df, repo_folder, user, pwd):
     pass
 
 
+"""
++-------------+--------------+------+-----+---------------------+----------------+
+| Field       | Type         | Null | Key | Default             | Extra          |
++-------------+--------------+------+-----+---------------------+----------------+
+| id          | int(11)      | NO   | PRI | NULL                | auto_increment |
+| url         | varchar(255) | YES  |     | NULL                |                |
+| owner_id    | int(11)      | YES  | MUL | NULL                |                |
+| name        | varchar(255) | NO   | MUL | NULL                |                |
+| description | varchar(255) | YES  |     | NULL                |                |
+| language    | varchar(255) | YES  |     | NULL                |                |
+| created_at  | timestamp    | NO   |     | CURRENT_TIMESTAMP   |                |
+| forked_from | int(11)      | YES  | MUL | NULL                |                |
+| deleted     | tinyint(1)   | NO   |     | 0                   |                |
+| updated_at  | timestamp    | NO   |     | 1970-01-01 01:00:01 |                |
+| n_watchers
+"""
+
 def read_pandas(file):
     try:
-        return pd.read_csv(file, sep='\t')
+        return pd.read_csv(file, sep=',', names=['id', 'url', 'owner_id', 'name', 'description', 'language',
+                                                'created_at', 'forked_from', 'deleted', 'updated_at', 'n_watchers'])
     except Exception as e:
         raise argparse.ArgumentTypeError('not a valid result csv file - %s' % e)
 
@@ -71,7 +88,7 @@ if __name__ == '__main__':
     parser.add_argument('output', type=writable_dir, help='The output folder to export the cloned repositories')
 
     parser.add_argument('--start', type=int, help='Start cloning from the index.')
-    parser.add_argument('--end', type=int, help='Maximum amount of projects to be cloned.')
+    parser.add_argument('--nprojects', type=int, help='Maximum number of projects to be cloned.')
 
     parser.add_argument('--user', type=str, help='User to call authenticated requests.')
     parser.add_argument('--pwd', type=str, help='Password for the user. ')
@@ -80,11 +97,11 @@ if __name__ == '__main__':
 
     df = args.input
 
-    global COUNT
     COUNT = 0
 
-    if args.start and args.end:
-        df = df[args.start : args.end]
+    # Explicitly ask for None because 0 -> false
+    if args.start is not None and args.nprojects is not None:
+        df = df[args.start : args.nprojects]
         COUNT = args.start
 
     user = None

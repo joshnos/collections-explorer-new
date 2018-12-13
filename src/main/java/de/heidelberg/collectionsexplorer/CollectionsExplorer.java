@@ -50,7 +50,6 @@ public class CollectionsExplorer implements Callable<Void>{
 	public Void call() throws Exception {
 		
 		try {
-
 			// create a complete report and parse all the files
 			List<File> filesList = FileTraverser.visitAllDirsAndFiles(inputDirectory, JAVA_EXTENSION);
 
