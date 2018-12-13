@@ -7,7 +7,6 @@ import java.util.Optional;
 import com.github.javaparser.Position;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.type.Type;
@@ -20,14 +19,12 @@ import de.heidelberg.collectionsexplorer.beans.ObjectCreationInfo.ObjectCreation
 import de.heidelberg.collectionsexplorer.beans.StringListInfo;
 
 /**
- * The simplest implementation of a Visitor. It just adds found
- * ObjectCreationExpr(essions) to the tally, which is stored as the Result
- * object res.
+ * Visitor that records object creation instances on code.
  * 
- * @author Janos Sebök
+ * @author diego.costa
  *
  */
-public class ObjectCreationVisitor extends VoidVisitorAdapter<Result> {
+public class ObjectCreationVisitor extends VoidVisitorAdapter<Result<ObjectCreationInfo>> {
 
 	Filter filter;
 
@@ -37,7 +34,7 @@ public class ObjectCreationVisitor extends VoidVisitorAdapter<Result> {
 	}
 	
 	@Override
-	public void visit(ObjectCreationExpr n, Result ret) {
+	public void visit(ObjectCreationExpr n, Result<ObjectCreationInfo> ret) {
 
 		String type = n.getTypeAsString();
 		if (filter.filter_match(type)) {

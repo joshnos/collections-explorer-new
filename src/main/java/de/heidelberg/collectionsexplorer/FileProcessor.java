@@ -3,11 +3,18 @@ package de.heidelberg.collectionsexplorer;
 import java.io.File;
 import java.io.FileInputStream;
 import java.nio.charset.Charset;
+import java.util.List;
+
+import org.pmw.tinylog.Logger;
 
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 
+import de.heidelberg.collectionsexplorer.beans.ObjectCreationInfo;
+import de.heidelberg.collectionsexplorer.beans.VariableDeclarationInfo;
 import de.heidelberg.collectionsexplorer.visitors.ObjectCreationVisitor;
+import de.heidelberg.collectionsexplorer.visitors.VariableDeclarationVisitor;
+import me.tongfei.progressbar.ProgressBar;
 
 /**
  * File processor provides the logic for parsing either a file or a path using
@@ -17,25 +24,30 @@ import de.heidelberg.collectionsexplorer.visitors.ObjectCreationVisitor;
  * A result contains all the found "new" statements in a given file. A report is
  * a list of results, by file.
  * 
- * @author Diego
+ * @author diego.costa
  *
  */
 public class FileProcessor {
 	
-	private static FileProcessor instance = null;
 	private static final String UTF_8 = "utf-8";
-	private Filter filter;
 	
-	protected FileProcessor(Filter filter) {
+	// FIXME: This is currently hardcoded but it should be flexible
+	private ObjectCreationVisitor objCreationVisitor;
+	private Report objCreationReport;
+	
+	private VariableDeclarationVisitor varDeclarationVisitor;
+	private Report varDeclarationReport;
+	
+	public FileProcessor(Filter filter) {
 		super();
-		this.filter = filter;
+		
+		objCreationVisitor = new ObjectCreationVisitor(filter);
+		objCreationReport = new Report();
+		
+		varDeclarationVisitor = new VariableDeclarationVisitor(filter);
+		varDeclarationReport = new Report();
 	}
-	
-	  public static FileProcessor getInstance(Filter filter) {
-	      if(instance == null)
-	         instance = new FileProcessor(filter);
-	      return instance;
-	   }
+
 
 	/**
 	 * This method handles processing a giving File. Processing in this context
@@ -49,26 +61,61 @@ public class FileProcessor {
 	 * 		The {@link Result} object containing the info of the file or <code>null</code> 
 	 * in case of any {@link Exception} in the parse 
 	 */
-	public Result process(File f) { 
+	public void process(File f) { 
 
-		Result result = null;
-		FileInputStream in;
-		try {
-			in = new FileInputStream(f.getAbsolutePath());
+		try(FileInputStream in = new FileInputStream(f.getAbsolutePath())){
 			CompilationUnit cu;
 			try {
 				cu = JavaParser.parse(in, Charset.forName(UTF_8));
+				
+				// ObjectCreation
+				Result<ObjectCreationInfo> objResult = new Result<>(f.getAbsolutePath());
+				cu.accept(objCreationVisitor, objResult);
+				objCreationReport.add(objResult);
+				
+				// VarDeclaration
+				Result<VariableDeclarationInfo> varResult = new Result<>(f.getAbsolutePath());
+				cu.accept(varDeclarationVisitor, varResult);
+				varDeclarationReport.add(varResult);
+				
 			} catch (Error e) {
-				System.out.println(String.format("Critical Javaparser error while processing the file %s.", f.getName()));
-				return null;
+				Logger.error(String.format("Critical Javaparser error while processing the file %s.", f.getName()));
 			}
-			result = new Result(f.getAbsolutePath());
-			cu.accept(new ObjectCreationVisitor(filter), result);
-			in.close();
+			
 		} catch (Exception e) {
 			// We can ignore small errors here
-			System.out.println(String.format("Error while processing the file %s.", f.getName()));
+			Logger.error(String.format("Error while processing the file %s.", f.getName()));
 		}
-		return result;
+	}
+	
+
+	/**
+	 * Process a List of Files
+	 * @param filesList
+	 */
+	public void process(List<File> filesList) {
+		
+		Logger.info(String.format("%d files to process", filesList.size()));
+		
+		ProgressBar pb = new ProgressBar("Processing", filesList.size());
+		pb.start();
+		
+		for(File file: filesList) {
+			Logger.debug(String.format("Processing file %s", file.getPath()));
+			process(file);
+			pb.step();
+		}
+		
+		pb.stop();
+	}
+
+	// FIXME: Flexibilize this
+	public Report getObjCreationReport() {
+		return objCreationReport;
+	}
+	
+	// FIXME: Flexibilize this
+	public Report getVarDeclarationReport() {
+		return varDeclarationReport;
 	}
 }

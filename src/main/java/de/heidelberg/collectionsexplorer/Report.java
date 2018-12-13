@@ -1,9 +1,5 @@
 package de.heidelberg.collectionsexplorer;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,34 +12,14 @@ import java.util.List;
  */
 public class Report {
 	
-	private List<Result> report = new ArrayList<Result>();
+	private List<Result<?>> report = new ArrayList<Result<?>>();
 	
-	public void add(Result r) {
+	public void add(Result<?> r) {
 		report.add(r);
 	}
 	
-	public List<Result> getResults() {
+	public List<Result<?>> getResults() {
 		return report;
 	}
 	
-	public void print() {
-		System.out.println(this);
-	}
-	
-	@Override
-	public String toString() {
-		StringBuilder s = new StringBuilder();
-		for (Result r : report)
-			s.append(r.toString());
-		return s.toString();
-	}
-
-	public void saveResults(File outputFile) throws IOException {
-		try (BufferedWriter br =
-                new BufferedWriter(new FileWriter(outputFile))) {
-			
-			br.write(this.toString());
-		} 
-		
-	}
 }

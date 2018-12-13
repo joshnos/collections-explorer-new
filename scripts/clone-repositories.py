@@ -88,7 +88,7 @@ if __name__ == '__main__':
     parser.add_argument('output', type=writable_dir, help='The output folder to export the cloned repositories')
 
     parser.add_argument('--start', type=int, help='Start cloning from the index.')
-    parser.add_argument('--nprojects', type=int, help='Maximum number of projects to be cloned.')
+    parser.add_argument('--end', type=int, help='Finish cloning on this index.')
 
     parser.add_argument('--user', type=str, help='User to call authenticated requests.')
     parser.add_argument('--pwd', type=str, help='Password for the user. ')
@@ -100,8 +100,8 @@ if __name__ == '__main__':
     COUNT = 0
 
     # Explicitly ask for None because 0 -> false
-    if args.start is not None and args.nprojects is not None:
-        df = df[args.start : args.nprojects]
+    if args.start is not None and args.end is not None:
+        df = df[args.start : args.end]
         COUNT = args.start
 
     user = None

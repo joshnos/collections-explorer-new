@@ -2,9 +2,14 @@ package de.heidelberg.collectionsexplorer;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 
+import org.pmw.tinylog.Logger;
+
+import de.heidelberg.collectionsexplorer.beans.GenericInfo;
+import de.heidelberg.collectionsexplorer.writer.CsvWriter;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -22,7 +27,6 @@ public class CollectionsExplorer implements Callable<Void>{
 
 	private static final String JAVA_EXTENSION = ".java";
 	
-	private static Filter filter = new Filter();
 	
 	/**
 	 * Input Parameters
@@ -36,8 +40,8 @@ public class CollectionsExplorer implements Callable<Void>{
 	@Parameters(index="0", arity = "1", paramLabel= "dir", description="Input directory where the explorer will retrieve collections usage")
 	private File inputDirectory;
 	
-	@Parameters(index="1", arity = "1", paramLabel= "out", description="File where the report will be saved")
-	private File outputFile;
+	@Parameters(index="1", arity = "1", paramLabel= "out", description="Directory where the report will be saved")
+	private File outputDirectory;
 	
 	public static void main(String[] args) {
 		
@@ -49,25 +53,61 @@ public class CollectionsExplorer implements Callable<Void>{
 	@Override
 	public Void call() throws Exception {
 		
+		Logger.info("Starting the Collections-Explorer");
+		
+		Filter filter = new Filter();
+		
+		if(filters == null) {
+			Logger.info(String.format("No filters configured. Inspecting all types"));
+		} else {
+			Logger.info(String.format("%d filters configured", filters.length));
+			for(int i = 0; i < filters.length; i++) {
+				Logger.info(String.format("Filter %d -< %s", i + 1, filters[i]));
+				filter.add(filters[i]);
+			}
+		}
+		
+		FileProcessor processor = new FileProcessor(filter);
+		
+		
 		try {
 			// create a complete report and parse all the files
+			Logger.info("Finding the amount of java files in the directory");
 			List<File> filesList = FileTraverser.visitAllDirsAndFiles(inputDirectory, JAVA_EXTENSION);
 
-			Report report = new Report();
-			FileProcessor processor = FileProcessor.getInstance(filter);
-			for (File file: filesList) {
-				report.add(processor.process(file));
-			}
-
-			report.saveResults(outputFile);
-
+			Logger.info(String.format("%d files found...", filesList.size()));
+			processor.process(filesList);
+			
+			Logger.info("All files processed, preparing the export");
+			
+			Report objReport = processor.getObjCreationReport();
+			Report varDeclarationReport = processor.getVarDeclarationReport();
+			
+			File objCreationFile = new File(outputDirectory + "obj-creation.csv");
+			CsvWriter.writeInfo(objCreationFile , formatToWrite(objReport));
+			
+			File varDeclarationFile = new File(outputDirectory + "var-declaration.csv");
+			CsvWriter.writeInfo(varDeclarationFile , formatToWrite(varDeclarationReport));
+			
+			Logger.info("All files processed and exported successfully");
+			
 		} catch (IOException e) {
-			System.out.println(
+			Logger.error(
 					String.format("Error while parsing the input. Message: %s. %s", e.getMessage(), e.getStackTrace()));
 		}
 		return null;
 	}
 
+	private List<GenericInfo> formatToWrite(Report report) {
+		
+		List<GenericInfo> returnedList = new ArrayList<>();
+		
+		for(var result: report.getResults()) {
+			returnedList.addAll(result.getEntries());
+		}
+		
+		return returnedList;
+	}
 
 	public boolean isVerbose() {
 		return verbose;
@@ -78,7 +118,7 @@ public class CollectionsExplorer implements Callable<Void>{
 	}
 
 	public File getOutputFile() {
-		return outputFile;
+		return outputDirectory;
 	}
 	
 	

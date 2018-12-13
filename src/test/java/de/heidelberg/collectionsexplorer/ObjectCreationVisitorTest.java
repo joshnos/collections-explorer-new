@@ -34,7 +34,7 @@ public class ObjectCreationVisitorTest {
 		try {
 
 			CompilationUnit compilationUnit = JavaParser.parse(classA);
-			Result result = new Result("");
+			Result<ObjectCreationInfo> result = new Result<>("");
 			compilationUnit.accept(new ObjectCreationVisitor(Filter.NO_FILTER), result);
 
 			assertEquals(4, result.getEntries().size());
@@ -68,7 +68,7 @@ public class ObjectCreationVisitorTest {
 		try {
 			
 			CompilationUnit compilationUnit = JavaParser.parse(classA);
-			Result result = new Result("");
+			Result<ObjectCreationInfo> result = new Result<>("");
 			
 			Filter filter = new Filter();
 			filter.add("(.*Map<.*>)|(.*Map)");

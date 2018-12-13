@@ -1,7 +1,5 @@
 package de.heidelberg.collectionsexplorer.beans;
 
-import java.util.List;
-
 import com.opencsv.bean.CsvBindByName;
 
 import lombok.Builder;
@@ -16,7 +14,7 @@ import lombok.ToString;
  */
 @Builder
 @ToString
-public class ObjectCreationInfo implements Reportable {
+public class ObjectCreationInfo extends GenericInfo{
 
 	@Getter	@CsvBindByName private String objectType;
 	@Getter	@CsvBindByName private String className;
