@@ -37,10 +37,10 @@ public class CollectionsExplorer implements Callable<Void>{
 	@Option(arity = "0..*", names= {"-filter"}, description="Use this to filter the specific types to be inspected")
 	private String[] filters;
 	
-	@Parameters(index="0", arity = "1", paramLabel= "dir", description="Input directory where the explorer will retrieve collections usage")
-	private File inputDirectory;
+	@Parameters(index="0", arity = "1..*", paramLabel= "dir", description="Input directory where the explorer will retrieve collections usage")
+	private File[] inputDirectories;
 	
-	@Parameters(index="1", arity = "1", paramLabel= "out", description="Directory where the report will be saved")
+	@Option(arity = "1", names= {"out"}, paramLabel= "out", description="Directory where the report will be saved")
 	private File outputDirectory;
 	
 	public static void main(String[] args) {
@@ -73,7 +73,12 @@ public class CollectionsExplorer implements Callable<Void>{
 		try {
 			// create a complete report and parse all the files
 			Logger.info("Finding the amount of java files in the directory");
-			List<File> filesList = FileTraverser.visitAllDirsAndFiles(inputDirectory, JAVA_EXTENSION);
+			
+			List<File> filesList = new ArrayList<>();
+			for(File dir : inputDirectories) {
+				Logger.info(String.format("Adding directory %s", dir.getPath()));
+				filesList.addAll(FileTraverser.visitAllDirsAndFiles(dir, JAVA_EXTENSION));
+			}
 
 			Logger.info(String.format("%d files found...", filesList.size()));
 			processor.process(filesList);
@@ -86,7 +91,13 @@ public class CollectionsExplorer implements Callable<Void>{
 			File objCreationFile = new File(outputDirectory + "obj-creation.csv");
 			CsvWriter.writeInfo(objCreationFile , formatToWrite(objReport));
 			
-			File varDeclarationFile = new File(outputDirectory + "var-declaration.csv");
+			File varDeclarationFile;
+			if(outputDirectory == null) {
+				varDeclarationFile = new File("var-declaration.csv");
+			} else {
+				varDeclarationFile = new File(outputDirectory + "var-declaration.csv");
+			}
+			
 			CsvWriter.writeInfo(varDeclarationFile , formatToWrite(varDeclarationReport));
 			
 			Logger.info("All files processed and exported successfully");
@@ -113,8 +124,8 @@ public class CollectionsExplorer implements Callable<Void>{
 		return verbose;
 	}
 
-	public File getInputDirectory() {
-		return inputDirectory;
+	public File[] getInputDirectory() {
+		return inputDirectories;
 	}
 
 	public File getOutputFile() {
