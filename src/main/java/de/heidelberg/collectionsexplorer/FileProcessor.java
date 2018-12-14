@@ -89,7 +89,7 @@ public class FileProcessor {
 				// ImportDeclaration
 				Result<ImportDeclarationInfo> importResult = new Result<>(f.getAbsolutePath());
 				cu.accept(importDeclarationVisitor, importResult);
-				varDeclarationReport.add(importResult);
+				importDeclarationReport.add(importResult);
 				
 			} catch (Error e) {
 				Logger.error(String.format("Critical Javaparser error while processing the file %s.", f.getName()));

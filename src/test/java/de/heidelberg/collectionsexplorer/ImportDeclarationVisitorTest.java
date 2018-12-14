@@ -38,5 +38,23 @@ public class ImportDeclarationVisitorTest {
 		
 		
 	}
+	
+	@Test
+	public void testSimpleImportExtractionWithFilter() {
+		
+		CompilationUnit compilationUnit = JavaParser.parse(classA);
+		Result<ImportDeclarationInfo> result = new Result<>("");
+		Filter filter = new Filter();
+		filter.add(".*Map<.*>");
+		filter.add(".*Map");
+		compilationUnit.accept(new ImportDeclarationVisitor(filter), result);
+		
+		assertEquals(2, result.getEntries().size());
+		
+		ImportDeclarationInfo import1 = result.getEntries().get(0);
+		assertEquals("java.util.HashMap", import1.getPackageImported());
+		
+		
+	}
 
 }
