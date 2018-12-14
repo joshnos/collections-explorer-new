@@ -22,7 +22,8 @@ import picocli.CommandLine.Parameters;
  * @author diego
  *
  */
-@Command(description = "Finds and parses Java code inside a directory and retrieve information about the collections usage.", name = "Collections-Explorer", mixinStandardHelpOptions = true, version = "1.0")
+@Command(description = "Finds and parses Java code inside a directory and retrieve information about the collections usage.", 
+name = "Collections-Explorer", mixinStandardHelpOptions = true, version = "1.0")
 public class CollectionsExplorer implements Callable<Void>{
 
 	private static final String JAVA_EXTENSION = ".java";
@@ -87,18 +88,26 @@ public class CollectionsExplorer implements Callable<Void>{
 			
 			Report objReport = processor.getObjCreationReport();
 			Report varDeclarationReport = processor.getVarDeclarationReport();
+			Report importDeclarationReport = processor.getImportDeclarationReport();
 			
-			File objCreationFile = new File(outputDirectory + "obj-creation.csv");
-			CsvWriter.writeInfo(objCreationFile , formatToWrite(objReport));
 			
+			File objCreationFile;
 			File varDeclarationFile;
+			File importDeclarationFile;
 			if(outputDirectory == null) {
 				varDeclarationFile = new File("var-declaration.csv");
+				objCreationFile = new File("obj-creation.csv");
+				importDeclarationFile = new File("import-declaration.csv");
+			
 			} else {
+				objCreationFile = new File(outputDirectory + "obj-creation.csv");
 				varDeclarationFile = new File(outputDirectory + "var-declaration.csv");
+				importDeclarationFile = new File(outputDirectory + "import-declaration.csv");
 			}
 			
+			CsvWriter.writeInfo(objCreationFile , formatToWrite(objReport));
 			CsvWriter.writeInfo(varDeclarationFile , formatToWrite(varDeclarationReport));
+			CsvWriter.writeInfo(importDeclarationFile , formatToWrite(importDeclarationReport));
 			
 			Logger.info("All files processed and exported successfully");
 			

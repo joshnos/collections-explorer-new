@@ -4,8 +4,6 @@ import argparse
 import requests
 import json
 from git import Repo
-from multiprocessing import Pool
-import numpy as np
 
 COUNT = 0
 
@@ -43,23 +41,6 @@ def clone_repository(df, repo_folder, user, pwd):
     COUNT = COUNT + 1
     pass
 
-
-"""
-+-------------+--------------+------+-----+---------------------+----------------+
-| Field       | Type         | Null | Key | Default             | Extra          |
-+-------------+--------------+------+-----+---------------------+----------------+
-| id          | int(11)      | NO   | PRI | NULL                | auto_increment |
-| url         | varchar(255) | YES  |     | NULL                |                |
-| owner_id    | int(11)      | YES  | MUL | NULL                |                |
-| name        | varchar(255) | NO   | MUL | NULL                |                |
-| description | varchar(255) | YES  |     | NULL                |                |
-| language    | varchar(255) | YES  |     | NULL                |                |
-| created_at  | timestamp    | NO   |     | CURRENT_TIMESTAMP   |                |
-| forked_from | int(11)      | YES  | MUL | NULL                |                |
-| deleted     | tinyint(1)   | NO   |     | 0                   |                |
-| updated_at  | timestamp    | NO   |     | 1970-01-01 01:00:01 |                |
-| n_watchers
-"""
 
 def read_pandas(file):
     try:

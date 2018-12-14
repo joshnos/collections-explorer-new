@@ -10,8 +10,10 @@ import org.pmw.tinylog.Logger;
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 
+import de.heidelberg.collectionsexplorer.beans.ImportDeclarationInfo;
 import de.heidelberg.collectionsexplorer.beans.ObjectCreationInfo;
 import de.heidelberg.collectionsexplorer.beans.VariableDeclarationInfo;
+import de.heidelberg.collectionsexplorer.visitors.ImportDeclarationVisitor;
 import de.heidelberg.collectionsexplorer.visitors.ObjectCreationVisitor;
 import de.heidelberg.collectionsexplorer.visitors.VariableDeclarationVisitor;
 import me.tongfei.progressbar.ProgressBar;
@@ -37,6 +39,9 @@ public class FileProcessor {
 	
 	private VariableDeclarationVisitor varDeclarationVisitor;
 	private Report varDeclarationReport;
+
+	private ImportDeclarationVisitor importDeclarationVisitor;
+	private Report importDeclarationReport;
 	
 	public FileProcessor(Filter filter) {
 		super();
@@ -46,6 +51,9 @@ public class FileProcessor {
 		
 		varDeclarationVisitor = new VariableDeclarationVisitor(filter);
 		varDeclarationReport = new Report();
+		
+		importDeclarationVisitor = new ImportDeclarationVisitor(filter);
+		importDeclarationReport = new Report();
 	}
 
 
@@ -77,6 +85,11 @@ public class FileProcessor {
 				Result<VariableDeclarationInfo> varResult = new Result<>(f.getAbsolutePath());
 				cu.accept(varDeclarationVisitor, varResult);
 				varDeclarationReport.add(varResult);
+				
+				// ImportDeclaration
+				Result<ImportDeclarationInfo> importResult = new Result<>(f.getAbsolutePath());
+				cu.accept(importDeclarationVisitor, importResult);
+				varDeclarationReport.add(importResult);
 				
 			} catch (Error e) {
 				Logger.error(String.format("Critical Javaparser error while processing the file %s.", f.getName()));
@@ -117,5 +130,10 @@ public class FileProcessor {
 	// FIXME: Flexibilize this
 	public Report getVarDeclarationReport() {
 		return varDeclarationReport;
+	}
+
+
+	public Report getImportDeclarationReport() {
+		return importDeclarationReport;
 	}
 }
