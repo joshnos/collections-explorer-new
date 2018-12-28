@@ -51,9 +51,9 @@ public class ObjectCreationVisitor extends VoidVisitorAdapter<Result<ObjectCreat
 
 		// Class
 		builder.className(retrieveClass(exp));
-
-		// Type
-		builder.objectType(exp.getTypeAsString());
+		
+		// Type Name
+		builder.objectType(exp.getType().getNameAsString());
 
 		// Argument Types
 		builder.argumentTypes(retrieveTypeArguments(exp));
