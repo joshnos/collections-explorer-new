@@ -43,10 +43,13 @@ public class FileProcessor {
 	private ImportDeclarationVisitor importDeclarationVisitor;
 	private Report importDeclarationReport;
 	
+	Filter filter;
+	
 	public FileProcessor(Filter filter) {
 		super();
 		
-		objCreationVisitor = new ObjectCreationVisitor(filter);
+		this.filter = filter;
+		
 		objCreationReport = new Report();
 		
 		varDeclarationVisitor = new VariableDeclarationVisitor(filter);
@@ -78,6 +81,8 @@ public class FileProcessor {
 				
 				// ObjectCreation
 				Result<ObjectCreationInfo> objResult = new Result<>(f.getAbsolutePath());
+				// We have a state per file 
+				objCreationVisitor = new ObjectCreationVisitor(filter);
 				cu.accept(objCreationVisitor, objResult);
 				objCreationReport.add(objResult);
 				

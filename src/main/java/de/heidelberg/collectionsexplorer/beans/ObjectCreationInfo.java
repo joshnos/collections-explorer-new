@@ -20,6 +20,7 @@ public class ObjectCreationInfo extends GenericInfo{
 	@Getter	@CsvBindByName private String className;
 	@Getter	@CsvBindByName private int lineNumber;
 	@Getter	@CsvBindByName private int columnNumber;
+	@Getter @CsvBindByName private String fullObjectType;
 	// This is not the type of the arguments but rather the object held
 	// In the new HashMap<Integer, String> -> Integer and String are the 
 	// argument types

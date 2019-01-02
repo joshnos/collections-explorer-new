@@ -42,6 +42,7 @@ public class ObjectCreationVisitorTest {
 			ObjectCreationInfo integer = result.getEntries().get(0);
 			assertEquals("ClassA", integer.getClassName());
 			assertEquals("Integer", integer.getObjectType());
+			assertEquals("Integer", integer.getFullObjectType());
 			assertEquals("2", integer.getArguments().getListedInfo().get(0));
 			assertTrue(integer.getArgumentTypes().getListedInfo().isEmpty());
 
@@ -52,12 +53,14 @@ public class ObjectCreationVisitorTest {
 			assertEquals("String", map.getArgumentTypes().getListedInfo().get(0));
 			assertEquals("Integer", map.getArgumentTypes().getListedInfo().get(1));
 			assertEquals("HashMap", map.getObjectType());
+			assertEquals("java.util.HashMap", map.getFullObjectType());
 			
 			ObjectCreationInfo map2 = result.getEntries().get(2);
 			assertEquals("map", map2.getArguments().getListedInfo().get(0));
 			assertTrue(map2.getArgumentTypes().getListedInfo().isEmpty());
 			assertEquals("HashMap", map2.getObjectType());
-
+			assertEquals("java.util.HashMap", map2.getFullObjectType());
+			
 		} catch (Exception e) {
 			System.out.println(e);
 			fail(e.getMessage());
