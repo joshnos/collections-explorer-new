@@ -13,7 +13,6 @@ public class ImportDeclarationVisitor extends VoidVisitorAdapter<Result<ImportDe
 	Filter filter;
 	
 	public ImportDeclarationVisitor(Filter filter) {
-		super();
 		this.filter = filter;
 	}
 

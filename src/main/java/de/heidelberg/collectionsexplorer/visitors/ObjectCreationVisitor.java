@@ -35,7 +35,6 @@ public class ObjectCreationVisitor extends VoidVisitorAdapter<Result<ObjectCreat
 	Map<String, String> importsDeclared;
 
 	public ObjectCreationVisitor(Filter filter) {
-		super();
 		this.filter = filter;
 		importsDeclared = new HashMap<>();
 	}

@@ -6,7 +6,9 @@ import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 
 import org.pmw.tinylog.Logger;
 
@@ -20,7 +22,7 @@ import de.heidelberg.collectionsexplorer.beans.MessageInfo;
 import de.heidelberg.collectionsexplorer.beans.ObjectCreationInfo;
 import de.heidelberg.collectionsexplorer.beans.VariableDeclarationInfo;
 import de.heidelberg.collectionsexplorer.visitors.ImportDeclarationVisitor;
-import de.heidelberg.collectionsexplorer.visitors.SomethingVisitor;
+import de.heidelberg.collectionsexplorer.visitors.StreamAPIUsageVisitor;
 import de.heidelberg.collectionsexplorer.visitors.ObjectCreationVisitor;
 import de.heidelberg.collectionsexplorer.visitors.VariableDeclarationVisitor;
 import me.tongfei.progressbar.ProgressBar;
@@ -40,6 +42,8 @@ public class FileProcessor {
 	
 	private static final String UTF_8 = "utf-8";
 	
+	EnumMap<VisitorType, VisitorReportContext> visitorCtxs;
+	
 	// FIXME: This is currently hardcoded but it should be flexible
 	private ObjectCreationVisitor objCreationVisitor;
 	private Report objCreationReport;
@@ -49,6 +53,9 @@ public class FileProcessor {
 
 	private ImportDeclarationVisitor importDeclarationVisitor;
 	private Report importDeclarationReport;
+	
+	private StreamAPIUsageVisitor streamVisitor;
+	private Report streamDeclarationReport;
 	
 	Filter filter;
 	BufferedWriter writer;
@@ -86,28 +93,9 @@ public class FileProcessor {
 			try {
 				cu = JavaParser.parse(in, Charset.forName(UTF_8));
 				
-				// ObjectCreation
-				//Result<ObjectCreationInfo> objResult = new Result<>(f.getAbsolutePath());
-				// We have a state per file 
-				//objCreationVisitor = new ObjectCreationVisitor(filter);
-				//cu.accept(objCreationVisitor, objResult);
-				//objCreationReport.add(objResult);
-				
-				// VarDeclaration
-				//Result<VariableDeclarationInfo> varResult = new Result<>(f.getAbsolutePath());
-				//cu.accept(varDeclarationVisitor, varResult);
-				//varDeclarationReport.add(varResult);
-				
-				// ImportDeclaration
-				//Result<ImportDeclarationInfo> importResult = new Result<>(f.getAbsolutePath());
-				//cu.accept(importDeclarationVisitor, importResult);
-				//importDeclarationReport.add(importResult);
-				Result<MessageInfo> objResult = new Result<>(f.getAbsolutePath());
-				SomethingVisitor messageVisitor = new SomethingVisitor(solver);
-				cu.accept(messageVisitor,objResult);
-				//if(messageVisitor.frequency()>0) {
-					//writer.write(f.getAbsolutePath()+"\n");
-				//}
+				for(VisitorReportContext<?> ctx : visitorCtxs.values()) {
+					ctx.inspect(cu, f.getAbsolutePath(), solver);
+				}
 				
 			} catch (Error e) {
 				Logger.error(String.format("Critical Javaparser error while processing the file %s.", f.getName()));
@@ -118,6 +106,7 @@ public class FileProcessor {
 			Logger.error(String.format("Error while processing the file %s.", f.getName()));
 		}
 	}
+	
 	public void close() throws IOException {
 		writer.close();
 	}

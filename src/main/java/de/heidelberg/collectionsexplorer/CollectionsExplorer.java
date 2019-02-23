@@ -8,6 +8,11 @@ import java.util.concurrent.Callable;
 
 import org.pmw.tinylog.Logger;
 
+import com.github.javaparser.symbolsolver.model.resolution.TypeSolver;
+import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
+import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver;
+import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
+
 import de.heidelberg.collectionsexplorer.beans.GenericInfo;
 import de.heidelberg.collectionsexplorer.writer.CsvWriter;
 import picocli.CommandLine;
@@ -44,6 +49,18 @@ public class CollectionsExplorer implements Callable<Void>{
 	@Option(arity = "1", names= {"-out"}, paramLabel= "out", description="Directory where the report will be saved")
 	private File outputDirectory;
 	
+	@Option(arity = "0", names= {"-var"}, paramLabel= "var", description="Analyze every variable declaration that matches the filter.")
+	private boolean inspectVarDeclaration;
+	
+	@Option(arity = "0", names= {"-new"}, paramLabel= "new", description="Analyze every object instantiation that matches the filter.")
+	private boolean inspectObjCreation;
+	
+	@Option(arity = "0", names= {"-import"}, paramLabel= "import", description="Analyze every import declaration that matches the filter.")
+	private boolean inspectImportDeclaration;
+	
+	@Option(arity = "0", names= {"-stream"}, paramLabel= "stream", description="Analyze every stream methods	 declaration using the filter.")
+	private boolean inspectStreamMethodDeclaration;
+	
 	public static void main(String[] args) {
 		
 	    // CheckSum implements Callable, so parsing, error handling and handling user
@@ -70,7 +87,6 @@ public class CollectionsExplorer implements Callable<Void>{
 		
 		FileProcessor processor = new FileProcessor(filter);
 		
-		
 		try {
 			// create a complete report and parse all the files
 			Logger.info("Finding the amount of java files in the directory");
@@ -79,10 +95,13 @@ public class CollectionsExplorer implements Callable<Void>{
 			for(File dir : inputDirectories) {
 				Logger.info(String.format("Adding directory %s", dir.getPath()));
 				filesList.addAll(FileTraverser.visitAllDirsAndFiles(dir, JAVA_EXTENSION));
+				
+				TypeSolver solver = new CombinedTypeSolver(
+						new ReflectionTypeSolver(), new JavaParserTypeSolver(dir));
+				Logger.info(String.format("%d files found...", filesList.size()));
+				processor.process(filesList, solver);
+				
 			}
-
-			Logger.info(String.format("%d files found...", filesList.size()));
-			//processor.process(filesList);
 			
 			Logger.info("All files processed, preparing the export");
 			
@@ -94,6 +113,7 @@ public class CollectionsExplorer implements Callable<Void>{
 			File objCreationFile;
 			File varDeclarationFile;
 			File importDeclarationFile;
+			
 			if(outputDirectory == null) {
 				varDeclarationFile = new File("var-declaration.csv");
 				objCreationFile = new File("obj-creation.csv");
