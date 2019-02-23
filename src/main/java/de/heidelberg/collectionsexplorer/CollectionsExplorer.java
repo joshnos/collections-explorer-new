@@ -3,6 +3,7 @@ package de.heidelberg.collectionsexplorer;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.concurrent.Callable;
 
@@ -87,6 +88,27 @@ public class CollectionsExplorer implements Callable<Void>{
 		
 		FileProcessor processor = new FileProcessor(filter);
 		
+		if(inspectImportDeclaration) {
+			Logger.info(String.format("Inspecting IMPORT-DECLARATIONS"));
+			processor.addVisitorContext(VisitorType.IMPORT_DECLARATION);
+		}
+		
+		if(inspectVarDeclaration) {
+			Logger.info(String.format("Inspecting VARIABLE-DECLARATIONS"));
+			processor.addVisitorContext(VisitorType.VARIABLE_DECLARATION);
+		}
+		
+		if(inspectObjCreation) {
+			Logger.info(String.format("Inspecting OBJECT-CREATIONS"));
+			processor.addVisitorContext(VisitorType.OBJECT_CREATION);
+		}
+		
+		if(inspectStreamMethodDeclaration) {
+			Logger.info(String.format("Inspecting STEAM-API-USAGE"));
+			processor.addVisitorContext(VisitorType.STREAM_API_USAGE);
+		}
+
+		
 		try {
 			// create a complete report and parse all the files
 			Logger.info("Finding the amount of java files in the directory");
@@ -105,29 +127,39 @@ public class CollectionsExplorer implements Callable<Void>{
 			
 			Logger.info("All files processed, preparing the export");
 			
-			Report objReport = processor.getObjCreationReport();
-			Report varDeclarationReport = processor.getVarDeclarationReport();
-			Report importDeclarationReport = processor.getImportDeclarationReport();
+			EnumMap<VisitorType,VisitorReportContext<?>> allVisitorContexts = processor.getAllVisitorContexts();
 			
-			
+			// TODO: Move this to a factory - It is quite bad here...
 			File objCreationFile;
 			File varDeclarationFile;
 			File importDeclarationFile;
+			File streamAPIUsageFile;
 			
 			if(outputDirectory == null) {
 				varDeclarationFile = new File("var-declaration.csv");
 				objCreationFile = new File("obj-creation.csv");
 				importDeclarationFile = new File("import-declaration.csv");
+				streamAPIUsageFile = new File("stream-api-usage.csv");
 			
 			} else {
 				objCreationFile = new File(outputDirectory + "obj-creation.csv");
 				varDeclarationFile = new File(outputDirectory + "var-declaration.csv");
 				importDeclarationFile = new File(outputDirectory + "import-declaration.csv");
+				streamAPIUsageFile = new File(outputDirectory + "stream-api-usage.csv");
 			}
 			
-			CsvWriter.writeInfo(objCreationFile , formatToWrite(objReport));
-			CsvWriter.writeInfo(varDeclarationFile , formatToWrite(varDeclarationReport));
-			CsvWriter.writeInfo(importDeclarationFile , formatToWrite(importDeclarationReport));
+			CsvWriter.writeInfo(objCreationFile , formatToWrite(allVisitorContexts
+					.get(VisitorType.OBJECT_CREATION).getReport()));
+			
+			CsvWriter.writeInfo(varDeclarationFile , formatToWrite(allVisitorContexts
+					.get(VisitorType.VARIABLE_DECLARATION).getReport()));
+			
+			CsvWriter.writeInfo(importDeclarationFile , formatToWrite(allVisitorContexts
+					.get(VisitorType.IMPORT_DECLARATION).getReport()));
+			
+			CsvWriter.writeInfo(streamAPIUsageFile , formatToWrite(allVisitorContexts
+					.get(VisitorType.STREAM_API_USAGE).getReport()));
+			
 			
 			Logger.info("All files processed and exported successfully");
 			

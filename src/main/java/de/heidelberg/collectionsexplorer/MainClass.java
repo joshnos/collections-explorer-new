@@ -1,7 +1,6 @@
 package de.heidelberg.collectionsexplorer;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,7 +34,6 @@ public class MainClass {
 		processor.process(filesList, solver);
 
 		Logger.info("All files processed and exported successfully");
-		processor.close();
 
 	}
 }

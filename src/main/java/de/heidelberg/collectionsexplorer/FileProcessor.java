@@ -1,30 +1,18 @@
 package de.heidelberg.collectionsexplorer;
 
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.EnumMap;
 import java.util.List;
-import java.util.Map;
 
 import org.pmw.tinylog.Logger;
 
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.symbolsolver.model.resolution.TypeSolver;
-import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver;
 
-import de.heidelberg.collectionsexplorer.beans.ImportDeclarationInfo;
-import de.heidelberg.collectionsexplorer.beans.MessageInfo;
-import de.heidelberg.collectionsexplorer.beans.ObjectCreationInfo;
-import de.heidelberg.collectionsexplorer.beans.VariableDeclarationInfo;
-import de.heidelberg.collectionsexplorer.visitors.ImportDeclarationVisitor;
-import de.heidelberg.collectionsexplorer.visitors.StreamAPIUsageVisitor;
-import de.heidelberg.collectionsexplorer.visitors.ObjectCreationVisitor;
-import de.heidelberg.collectionsexplorer.visitors.VariableDeclarationVisitor;
 import me.tongfei.progressbar.ProgressBar;
 
 /**
@@ -42,35 +30,12 @@ public class FileProcessor {
 	
 	private static final String UTF_8 = "utf-8";
 	
-	EnumMap<VisitorType, VisitorReportContext> visitorCtxs;
-	
-	// FIXME: This is currently hardcoded but it should be flexible
-	private ObjectCreationVisitor objCreationVisitor;
-	private Report objCreationReport;
-	
-	private VariableDeclarationVisitor varDeclarationVisitor;
-	private Report varDeclarationReport;
-
-	private ImportDeclarationVisitor importDeclarationVisitor;
-	private Report importDeclarationReport;
-	
-	private StreamAPIUsageVisitor streamVisitor;
-	private Report streamDeclarationReport;
-	
+	EnumMap<VisitorType, VisitorReportContext<?>> visitorCtxs;
 	Filter filter;
-	BufferedWriter writer;
+	
 	public FileProcessor(Filter filter) throws IOException {
 		super();
-		writer = new BufferedWriter(new FileWriter("output.txt"));
 		this.filter = filter;
-		
-		objCreationReport = new Report();
-		
-		varDeclarationVisitor = new VariableDeclarationVisitor(filter);
-		varDeclarationReport = new Report();
-		
-		importDeclarationVisitor = new ImportDeclarationVisitor(filter);
-		importDeclarationReport = new Report();
 	}
 
 
@@ -107,10 +72,6 @@ public class FileProcessor {
 		}
 	}
 	
-	public void close() throws IOException {
-		writer.close();
-	}
-
 	/**
 	 * Process a List of Files
 	 * @param filesList
@@ -132,18 +93,14 @@ public class FileProcessor {
 		pb.stop();
 	}
 
-	// FIXME: Flexibilize this
-	public Report getObjCreationReport() {
-		return objCreationReport;
-	}
-	
-	// FIXME: Flexibilize this
-	public Report getVarDeclarationReport() {
-		return varDeclarationReport;
+
+	public EnumMap<VisitorType, VisitorReportContext<?>> getAllVisitorContexts() {
+		return this.visitorCtxs;
 	}
 
 
-	public Report getImportDeclarationReport() {
-		return importDeclarationReport;
+	public void addVisitorContext(VisitorType type) {
+		this.visitorCtxs.put(type, new VisitorReportContext<>(type, filter));
 	}
+
 }

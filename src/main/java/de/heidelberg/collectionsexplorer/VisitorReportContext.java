@@ -13,6 +13,14 @@ public class VisitorReportContext<T extends GenericInfo> {
 	private Filter filter;
 	
 	
+	
+	public VisitorReportContext(VisitorType visitorType, Filter filter) {
+		super();
+		this.visitorType = visitorType;
+		this.filter = filter;
+		this.report = new Report();
+	}
+
 	public Report getReport() {
 		return this.report;
 	}
