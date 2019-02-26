@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import com.github.javaparser.Position;
 import com.github.javaparser.ast.ImportDeclaration;
@@ -37,6 +38,8 @@ public class ObjectCreationVisitor extends VoidVisitorAdapter<Result<ObjectCreat
 	public ObjectCreationVisitor(Filter filter) {
 		this.filter = filter;
 		importsDeclared = new HashMap<>();
+		
+		importsDeclared.keySet().stream().filter(x -> x.equals("s")).collect(Collectors.toList());
 	}
 	
 	@Override

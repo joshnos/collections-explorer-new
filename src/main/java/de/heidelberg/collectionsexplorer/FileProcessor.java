@@ -55,7 +55,7 @@ public class FileProcessor {
 	 * 		The {@link Result} object containing the info of the file or <code>null</code> 
 	 * in case of any {@link Exception} in the parse 
 	 */
-	public void process(File f, TypeSolver solver) { 
+	public void process(File f) { 
 
 		try(FileInputStream in = new FileInputStream(f.getAbsolutePath())){
 			CompilationUnit cu;
@@ -63,7 +63,7 @@ public class FileProcessor {
 				cu = JavaParser.parse(in, Charset.forName(UTF_8));
 				
 				for(VisitorReportContext<?> ctx : visitorCtxs.values()) {
-					ctx.inspect(cu, f.getAbsolutePath(), solver);
+					ctx.inspect(cu, f.getAbsolutePath());
 				}
 				
 			} catch (Error e) {
@@ -81,7 +81,7 @@ public class FileProcessor {
 	 * @param filesList
 	 * @param solver 
 	 */
-	public void process(List<File> filesList, TypeSolver solver) {
+	public void process(List<File> filesList) {
 		
 		Logger.info(String.format("%d files to process", filesList.size()));
 		
@@ -90,7 +90,7 @@ public class FileProcessor {
 		
 		for(File file: filesList) {
 			Logger.debug(String.format("Processing file %s", file.getPath()));
-			process(file,solver);
+			process(file);
 			pb.step();
 		}
 		

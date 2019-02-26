@@ -26,12 +26,12 @@ public class VisitorReportContext<T extends GenericInfo> {
 		return this.report;
 	}
 	
-	public void inspect(CompilationUnit cu, String path, TypeSolver solver) {
+	public void inspect(CompilationUnit cu, String path) {
 		
 		Result<T> objResult = new Result<>(path);
 		
 		// We have a state per file 
-		VoidVisitorAdapter<Result<T>> instance = visitorType.getInstance(filter, solver);
+		VoidVisitorAdapter<Result<T>> instance = visitorType.getInstance(filter);
 		
 		cu.accept(instance, objResult);
 		report.add(objResult);

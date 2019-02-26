@@ -19,7 +19,7 @@ public enum VisitorType {
 	OBJECT_CREATION("obj-creation.csv")
 	{
 		@Override
-		public VoidVisitorAdapter<Result<ObjectCreationInfo>> getInstance(Filter filter, TypeSolver solver) {
+		public VoidVisitorAdapter<Result<ObjectCreationInfo>> getInstance(Filter filter) {
 			return new ObjectCreationVisitor(filter);
 		}
 
@@ -27,26 +27,26 @@ public enum VisitorType {
 	
 	VARIABLE_DECLARATION("var-declaration.csv") {
 		@Override
-		public VoidVisitorAdapter<Result<VariableDeclarationInfo>> getInstance(Filter filter, TypeSolver solver) {
+		public VoidVisitorAdapter<Result<VariableDeclarationInfo>> getInstance(Filter filter) {
 			return new VariableDeclarationVisitor(filter);
 		}
 	},
 	
 	IMPORT_DECLARATION("import-declaration.csv") {
 		@Override
-		public VoidVisitorAdapter<Result<ImportDeclarationInfo>> getInstance(Filter filter, TypeSolver solver) {
+		public VoidVisitorAdapter<Result<ImportDeclarationInfo>> getInstance(Filter filter) {
 			return new ImportDeclarationVisitor(filter);
 		}
 	},
 	
 	STREAM_API_USAGE("stream-api-usage.csv") {
 		@Override
-		public VoidVisitorAdapter<Result<StreamOperationsInfo>>  getInstance(Filter filter, TypeSolver solver) {
-			return new StreamAPIUsageVisitor(filter, solver);
+		public VoidVisitorAdapter<Result<StreamOperationsInfo>>  getInstance(Filter filter) {
+			return new StreamAPIUsageVisitor(filter);
 		}
 	};
 	
-	public abstract <T> VoidVisitorAdapter<T> getInstance(Filter filter, TypeSolver solver);
+	public abstract <T> VoidVisitorAdapter<T> getInstance(Filter filter);
 	public String outputFile;
 	
 	private VisitorType(String outputFile) {

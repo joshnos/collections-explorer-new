@@ -38,7 +38,7 @@ public class TypeSolverIntegrationTest {
 			filesList.addAll(FileTraverser.visitAllDirsAndFiles(inputDirectory, ".java"));
 	
 			Logger.info(String.format("%d files found...", filesList.size()));
-			processor.process(filesList, solver);
+			processor.process(filesList);
 	
 			Logger.info("All files processed and exported successfully");
 		

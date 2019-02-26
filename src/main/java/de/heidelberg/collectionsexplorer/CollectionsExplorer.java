@@ -10,8 +10,11 @@ import java.util.concurrent.Callable;
 
 import org.pmw.tinylog.Logger;
 
+import com.github.javaparser.JavaParser;
+import com.github.javaparser.symbolsolver.JavaSymbolSolver;
 import com.github.javaparser.symbolsolver.model.resolution.TypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
+import com.github.javaparser.symbolsolver.resolution.typesolvers.JarTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
 
@@ -38,37 +41,52 @@ public class CollectionsExplorer implements Callable<Void> {
 	private static final String JAVA_EXTENSION = ".java";
 
 	/**
-	 * Input Parameters
+	 * INPUT PARAMETERS
 	 */
-	@Option(names = { "-v", "--verbose" }, description = "Be verbose.")
-	private boolean verbose = false;
-
-	@Option(arity = "0..*", names = {
-			"-filter" }, description = "Use this to filter the specific types to be inspected")
-	private String[] filters;
 
 	@Parameters(index = "0", arity = "1..*", paramLabel = "dir", description = "Input directory where the explorer will retrieve collections usage")
 	private File[] inputDirectories;
 
-	@Option(arity = "1", names = {
-			"-out" }, paramLabel = "out", description = "Directory where the report will be saved")
+	/**
+	 * OPTIONAL PARAMETERS
+	 */
+	@Option(names = { "-v", "--verbose" }, description = "Be verbose.")
+	private boolean verbose = false;
+
+	@Option(arity = "0..*", names = {"-filter" }, 
+			description = "Use this to filter the specific types to be inspected")
+	private String[] filters;
+
+	@Option(arity = "1", names = {"-out" }, paramLabel = "out", 
+			description = "Directory where the report will be saved")
 	private File outputDirectory;
 
-	@Option(arity = "0", names = {
-			"-var" }, paramLabel = "var", description = "Analyze every variable declaration that matches the filter.")
+	/**
+	 *  VISITORS PARAMETERS
+	 */
+	@Option(arity = "0", names = {"-var" }, paramLabel = "var", 
+			description = "Analyze every variable declaration that matches the filter.")
 	private boolean inspectVarDeclaration;
 
-	@Option(arity = "0", names = {
-			"-new" }, paramLabel = "new", description = "Analyze every object instantiation that matches the filter.")
+	@Option(arity = "0", names = {"-new" }, paramLabel = "new", 
+			description = "Analyze every object instantiation that matches the filter.")
 	private boolean inspectObjCreation;
 
-	@Option(arity = "0", names = {
-			"-import" }, paramLabel = "import", description = "Analyze every import declaration that matches the filter.")
+	@Option(arity = "0", names = {"-import" }, paramLabel = "import", 
+			description = "Analyze every import declaration that matches the filter.")
 	private boolean inspectImportDeclaration;
 
-	@Option(arity = "0", names = {
-			"-stream" }, paramLabel = "stream", description = "Analyze every stream methods	 declaration using the filter.")
+	@Option(arity = "0", names = {"-stream" }, paramLabel = "stream", 
+			description = "Analyze every stream methods	 declaration using the filter.")
 	private boolean inspectStreamMethodDeclaration;
+	
+	/**
+	 * TYPE SOLVER PARAMETERS
+	 */
+	@Option(arity = "0", names = {"-jar" }, paramLabel = "jar", 
+			description = "Jar file to help resolve symbol types (stream usage).")
+	private File jarFile;
+	
 
 	public static void main(String[] args) {
 
@@ -94,27 +112,7 @@ public class CollectionsExplorer implements Callable<Void> {
 			}
 		}
 
-		FileProcessor processor = new FileProcessor(filter);
-
-		if (inspectImportDeclaration) {
-			Logger.info(String.format("Inspecting IMPORT-DECLARATIONS"));
-			processor.addVisitorContext(VisitorType.IMPORT_DECLARATION);
-		}
-
-		if (inspectVarDeclaration) {
-			Logger.info(String.format("Inspecting VARIABLE-DECLARATIONS"));
-			processor.addVisitorContext(VisitorType.VARIABLE_DECLARATION);
-		}
-
-		if (inspectObjCreation) {
-			Logger.info(String.format("Inspecting OBJECT-CREATIONS"));
-			processor.addVisitorContext(VisitorType.OBJECT_CREATION);
-		}
-
-		if (inspectStreamMethodDeclaration) {
-			Logger.info(String.format("Inspecting STREAM-API-USAGE"));
-			processor.addVisitorContext(VisitorType.STREAM_API_USAGE);
-		}
+		FileProcessor processor = createAndConfigureProcessor(filter);
 
 		try {
 			// create a complete report and parse all the files
@@ -125,9 +123,21 @@ public class CollectionsExplorer implements Callable<Void> {
 				Logger.info(String.format("Adding directory %s", dir.getPath()));
 				filesList.addAll(FileTraverser.visitAllDirsAndFiles(dir, JAVA_EXTENSION));
 
-				TypeSolver solver = new CombinedTypeSolver(new ReflectionTypeSolver(), new JavaParserTypeSolver(dir));
+				CombinedTypeSolver solver = new CombinedTypeSolver(
+						new JavaParserTypeSolver(dir), // Needs an accurate root directory
+						new ReflectionTypeSolver());   // Works for types we also use here (java.util, java.lang...)
+
+				if(jarFile != null) {
+					solver.add(new JarTypeSolver(jarFile));
+					Logger.info(String.format("Jar file %s specified for the type solver.", jarFile));
+				}
+				
+				// Configure JavaParser to use type resolution
+				JavaSymbolSolver symbolSolver = new JavaSymbolSolver(solver);
+				JavaParser.getStaticConfiguration().setSymbolResolver(symbolSolver);
+
 				Logger.info(String.format("%d files found...", filesList.size()));
-				processor.process(filesList, solver);
+				processor.process(filesList);
 
 			}
 
@@ -163,6 +173,32 @@ public class CollectionsExplorer implements Callable<Void> {
 					String.format("Error while parsing the input. Message: %s. %s", e.getMessage(), e.getStackTrace()));
 		}
 		return null;
+	}
+
+	private FileProcessor createAndConfigureProcessor(Filter filter) throws IOException {
+		FileProcessor processor = new FileProcessor(filter);
+
+		if (inspectImportDeclaration) {
+			Logger.info(String.format("Inspecting IMPORT-DECLARATIONS"));
+			processor.addVisitorContext(VisitorType.IMPORT_DECLARATION);
+		}
+
+		if (inspectVarDeclaration) {
+			Logger.info(String.format("Inspecting VARIABLE-DECLARATIONS"));
+			processor.addVisitorContext(VisitorType.VARIABLE_DECLARATION);
+		}
+
+		if (inspectObjCreation) {
+			Logger.info(String.format("Inspecting OBJECT-CREATIONS"));
+			processor.addVisitorContext(VisitorType.OBJECT_CREATION);
+		}
+
+		if (inspectStreamMethodDeclaration) {
+			Logger.info(String.format("Inspecting STREAM-API-USAGE"));
+			processor.addVisitorContext(VisitorType.STREAM_API_USAGE);
+		}
+
+		return processor;
 	}
 
 	private List<GenericInfo> formatToWrite(Report report) {

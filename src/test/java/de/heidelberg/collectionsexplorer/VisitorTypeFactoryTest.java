@@ -19,7 +19,7 @@ public class VisitorTypeFactoryTest {
 	public void testObjectCreation() {
 		
 		VoidVisitorAdapter<Result<ObjectCreationInfo>> instance = 
-				VisitorType.OBJECT_CREATION.getInstance(new Filter(), null);
+				VisitorType.OBJECT_CREATION.getInstance(new Filter());
 		
 		assertNotNull(instance);
 		assertTrue(instance instanceof ObjectCreationVisitor);

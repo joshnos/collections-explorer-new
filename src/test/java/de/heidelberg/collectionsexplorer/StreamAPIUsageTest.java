@@ -45,7 +45,7 @@ public class StreamAPIUsageTest {
 			JavaSymbolSolver symbolSolver = new JavaSymbolSolver(combinedTypeSolver);
 			JavaParser.getStaticConfiguration().setSymbolResolver(symbolSolver);
 
-			compilationUnit.accept(new StreamAPIUsageVisitor(Filter.NO_FILTER, combinedTypeSolver), result);
+			compilationUnit.accept(new StreamAPIUsageVisitor(Filter.NO_FILTER), result);
 
 			StreamOperationsInfo entries = result.getEntries().get(0);
 			
