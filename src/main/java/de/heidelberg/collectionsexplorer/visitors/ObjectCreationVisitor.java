@@ -5,11 +5,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import com.github.javaparser.Position;
 import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.NodeList;
-import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.Name;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
@@ -17,10 +17,11 @@ import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 
 import de.heidelberg.collectionsexplorer.Filter;
-import de.heidelberg.collectionsexplorer.Result;
 import de.heidelberg.collectionsexplorer.beans.ObjectCreationInfo;
 import de.heidelberg.collectionsexplorer.beans.ObjectCreationInfo.ObjectCreationInfoBuilder;
 import de.heidelberg.collectionsexplorer.beans.StringListInfo;
+import de.heidelberg.collectionsexplorer.context.Result;
+import de.heidelberg.collectionsexplorer.util.ParserUtil;
 
 /**
  * Visitor that records object creation instances on code.
@@ -35,9 +36,10 @@ public class ObjectCreationVisitor extends VoidVisitorAdapter<Result<ObjectCreat
 	Map<String, String> importsDeclared;
 
 	public ObjectCreationVisitor(Filter filter) {
-		super();
 		this.filter = filter;
 		importsDeclared = new HashMap<>();
+		
+		importsDeclared.keySet().stream().filter(x -> x.equals("s")).collect(Collectors.toList());
 	}
 	
 	@Override
@@ -73,7 +75,7 @@ public class ObjectCreationVisitor extends VoidVisitorAdapter<Result<ObjectCreat
 		ObjectCreationInfoBuilder builder = ObjectCreationInfo.builder();
 
 		// Class
-		builder.className(retrieveClass(exp));
+		builder.className(ParserUtil.retrieveClass(exp));
 		
 		// Type Name
 		builder.objectType(exp.getType().getNameAsString());
@@ -88,9 +90,8 @@ public class ObjectCreationVisitor extends VoidVisitorAdapter<Result<ObjectCreat
 		builder.arguments(retrieveArguments(exp));
 
 		// Position in the code
-		Position position = exp.getBegin().get();
-		builder.lineNumber(position.line);
-		builder.columnNumber(position.column);
+		builder.lineNumber(ParserUtil.getLineNumber(exp));
+		builder.columnNumber(ParserUtil.getColumn(exp));
 		return builder.build();
 	}
 
@@ -133,14 +134,4 @@ public class ObjectCreationVisitor extends VoidVisitorAdapter<Result<ObjectCreat
 		return new StringListInfo();
 	}
 
-	private String retrieveClass(ObjectCreationExpr n) {
-		Optional<ClassOrInterfaceDeclaration> ancestorOfType = n.findAncestor(ClassOrInterfaceDeclaration.class);
-		if (ancestorOfType.isPresent()) {
-
-			ClassOrInterfaceDeclaration declr = ancestorOfType.get();
-			return declr.getNameAsString();
-		}
-
-		return "";
-	}
 }

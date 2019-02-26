@@ -2,20 +2,20 @@ package de.heidelberg.collectionsexplorer;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.EnumMap;
 import java.util.List;
 
 import org.pmw.tinylog.Logger;
 
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.symbolsolver.model.resolution.TypeSolver;
 
-import de.heidelberg.collectionsexplorer.beans.ImportDeclarationInfo;
-import de.heidelberg.collectionsexplorer.beans.ObjectCreationInfo;
-import de.heidelberg.collectionsexplorer.beans.VariableDeclarationInfo;
-import de.heidelberg.collectionsexplorer.visitors.ImportDeclarationVisitor;
-import de.heidelberg.collectionsexplorer.visitors.ObjectCreationVisitor;
-import de.heidelberg.collectionsexplorer.visitors.VariableDeclarationVisitor;
+import de.heidelberg.collectionsexplorer.context.Result;
+import de.heidelberg.collectionsexplorer.context.VisitorReportContext;
+import de.heidelberg.collectionsexplorer.context.VisitorType;
 import me.tongfei.progressbar.ProgressBar;
 
 /**
@@ -33,30 +33,13 @@ public class FileProcessor {
 	
 	private static final String UTF_8 = "utf-8";
 	
-	// FIXME: This is currently hardcoded but it should be flexible
-	private ObjectCreationVisitor objCreationVisitor;
-	private Report objCreationReport;
-	
-	private VariableDeclarationVisitor varDeclarationVisitor;
-	private Report varDeclarationReport;
-
-	private ImportDeclarationVisitor importDeclarationVisitor;
-	private Report importDeclarationReport;
-	
+	EnumMap<VisitorType, VisitorReportContext<?>> visitorCtxs;
 	Filter filter;
 	
-	public FileProcessor(Filter filter) {
+	public FileProcessor(Filter filter) throws IOException {
 		super();
-		
 		this.filter = filter;
-		
-		objCreationReport = new Report();
-		
-		varDeclarationVisitor = new VariableDeclarationVisitor(filter);
-		varDeclarationReport = new Report();
-		
-		importDeclarationVisitor = new ImportDeclarationVisitor(filter);
-		importDeclarationReport = new Report();
+		this.visitorCtxs = new EnumMap<>(VisitorType.class);
 	}
 
 
@@ -79,22 +62,9 @@ public class FileProcessor {
 			try {
 				cu = JavaParser.parse(in, Charset.forName(UTF_8));
 				
-				// ObjectCreation
-				Result<ObjectCreationInfo> objResult = new Result<>(f.getAbsolutePath());
-				// We have a state per file 
-				objCreationVisitor = new ObjectCreationVisitor(filter);
-				cu.accept(objCreationVisitor, objResult);
-				objCreationReport.add(objResult);
-				
-				// VarDeclaration
-				Result<VariableDeclarationInfo> varResult = new Result<>(f.getAbsolutePath());
-				cu.accept(varDeclarationVisitor, varResult);
-				varDeclarationReport.add(varResult);
-				
-				// ImportDeclaration
-				Result<ImportDeclarationInfo> importResult = new Result<>(f.getAbsolutePath());
-				cu.accept(importDeclarationVisitor, importResult);
-				importDeclarationReport.add(importResult);
+				for(VisitorReportContext<?> ctx : visitorCtxs.values()) {
+					ctx.inspect(cu, f.getAbsolutePath());
+				}
 				
 			} catch (Error e) {
 				Logger.error(String.format("Critical Javaparser error while processing the file %s.", f.getName()));
@@ -106,10 +76,10 @@ public class FileProcessor {
 		}
 	}
 	
-
 	/**
 	 * Process a List of Files
 	 * @param filesList
+	 * @param solver 
 	 */
 	public void process(List<File> filesList) {
 		
@@ -127,18 +97,14 @@ public class FileProcessor {
 		pb.stop();
 	}
 
-	// FIXME: Flexibilize this
-	public Report getObjCreationReport() {
-		return objCreationReport;
-	}
-	
-	// FIXME: Flexibilize this
-	public Report getVarDeclarationReport() {
-		return varDeclarationReport;
+
+	public EnumMap<VisitorType, VisitorReportContext<?>> getAllVisitorContexts() {
+		return this.visitorCtxs;
 	}
 
 
-	public Report getImportDeclarationReport() {
-		return importDeclarationReport;
+	public void addVisitorContext(VisitorType type) {
+		this.visitorCtxs.put(type, new VisitorReportContext<>(type, filter));
 	}
+
 }

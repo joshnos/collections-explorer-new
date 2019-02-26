@@ -27,5 +27,7 @@ hs_err_pid*
 .settings
 .classpath
 .project
+/target/
+
 
 scripts/\.idea/

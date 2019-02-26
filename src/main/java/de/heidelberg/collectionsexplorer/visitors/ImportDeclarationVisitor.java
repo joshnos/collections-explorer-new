@@ -4,16 +4,15 @@ import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 
 import de.heidelberg.collectionsexplorer.Filter;
-import de.heidelberg.collectionsexplorer.Result;
 import de.heidelberg.collectionsexplorer.beans.ImportDeclarationInfo;
 import de.heidelberg.collectionsexplorer.beans.ImportDeclarationInfo.ImportDeclarationInfoBuilder;
+import de.heidelberg.collectionsexplorer.context.Result;
 
 public class ImportDeclarationVisitor extends VoidVisitorAdapter<Result<ImportDeclarationInfo>> {
 	
 	Filter filter;
 	
 	public ImportDeclarationVisitor(Filter filter) {
-		super();
 		this.filter = filter;
 	}
 
