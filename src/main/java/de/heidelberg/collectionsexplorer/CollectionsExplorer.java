@@ -124,9 +124,11 @@ public class CollectionsExplorer implements Callable<Void> {
 				filesList.addAll(FileTraverser.visitAllDirsAndFiles(dir, JAVA_EXTENSION));
 
 				CombinedTypeSolver solver = new CombinedTypeSolver(
-						new JavaParserTypeSolver(dir), // Needs an accurate root directory
+						//new JavaParserTypeSolver(dir), // Needs an accurate root directory THIS IS VERY SLOW
 						new ReflectionTypeSolver());   // Works for types we also use here (java.util, java.lang...)
 
+				
+				
 				if(jarFile != null) {
 					solver.add(new JarTypeSolver(jarFile));
 					Logger.info(String.format("Jar file %s specified for the type solver.", jarFile));
