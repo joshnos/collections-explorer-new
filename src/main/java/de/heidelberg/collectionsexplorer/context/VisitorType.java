@@ -1,8 +1,9 @@
-package de.heidelberg.collectionsexplorer;
+package de.heidelberg.collectionsexplorer.context;
 
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import com.github.javaparser.symbolsolver.model.resolution.TypeSolver;
 
+import de.heidelberg.collectionsexplorer.Filter;
 import de.heidelberg.collectionsexplorer.beans.ImportDeclarationInfo;
 import de.heidelberg.collectionsexplorer.beans.ObjectCreationInfo;
 import de.heidelberg.collectionsexplorer.beans.VariableDeclarationInfo;

@@ -9,6 +9,7 @@ import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 
 import de.heidelberg.collectionsexplorer.beans.ImportDeclarationInfo;
+import de.heidelberg.collectionsexplorer.context.Result;
 import de.heidelberg.collectionsexplorer.visitors.ImportDeclarationVisitor;
 
 @DisplayName("Test for ImportDeclaration visitor")

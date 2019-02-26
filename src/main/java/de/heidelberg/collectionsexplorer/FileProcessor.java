@@ -13,6 +13,9 @@ import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.symbolsolver.model.resolution.TypeSolver;
 
+import de.heidelberg.collectionsexplorer.context.Result;
+import de.heidelberg.collectionsexplorer.context.VisitorReportContext;
+import de.heidelberg.collectionsexplorer.context.VisitorType;
 import me.tongfei.progressbar.ProgressBar;
 
 /**

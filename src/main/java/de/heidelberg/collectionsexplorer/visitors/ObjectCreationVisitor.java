@@ -17,9 +17,9 @@ import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 
 import de.heidelberg.collectionsexplorer.Filter;
-import de.heidelberg.collectionsexplorer.Result;
 import de.heidelberg.collectionsexplorer.beans.ObjectCreationInfo;
 import de.heidelberg.collectionsexplorer.beans.ObjectCreationInfo.ObjectCreationInfoBuilder;
+import de.heidelberg.collectionsexplorer.context.Result;
 import de.heidelberg.collectionsexplorer.beans.StringListInfo;
 
 /**

@@ -12,6 +12,7 @@ import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 
 import de.heidelberg.collectionsexplorer.beans.ObjectCreationInfo;
+import de.heidelberg.collectionsexplorer.context.Result;
 import de.heidelberg.collectionsexplorer.visitors.ObjectCreationVisitor;
 
 @DisplayName("Test suite for Object Creation Visitor")

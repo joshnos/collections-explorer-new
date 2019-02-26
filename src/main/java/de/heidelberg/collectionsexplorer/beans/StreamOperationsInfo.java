@@ -16,6 +16,7 @@ public class StreamOperationsInfo extends GenericInfo {
 	
 	@Getter	@CsvBindByName private String sourceType;
 	@Getter @CsvBindByName private StringListInfo streamOperations;
+	@Getter @CsvBindByName private StringListInfo argumentTypes;
 	
 
 }

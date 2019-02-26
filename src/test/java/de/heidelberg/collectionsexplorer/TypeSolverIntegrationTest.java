@@ -41,7 +41,6 @@ public class TypeSolverIntegrationTest {
 			processor.process(filesList, solver);
 	
 			Logger.info("All files processed and exported successfully");
-			processor.close();
 		
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

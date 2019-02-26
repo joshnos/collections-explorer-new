@@ -11,10 +11,10 @@ import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 
 import de.heidelberg.collectionsexplorer.Filter;
-import de.heidelberg.collectionsexplorer.Result;
 import de.heidelberg.collectionsexplorer.beans.StringListInfo;
 import de.heidelberg.collectionsexplorer.beans.VariableDeclarationInfo;
 import de.heidelberg.collectionsexplorer.beans.VariableDeclarationInfo.VariableDeclarationInfoBuilder;
+import de.heidelberg.collectionsexplorer.context.Result;
 
 public class VariableDeclarationVisitor extends VoidVisitorAdapter<Result<VariableDeclarationInfo>> {
 	

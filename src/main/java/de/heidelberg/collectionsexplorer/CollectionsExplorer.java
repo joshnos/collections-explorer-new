@@ -15,6 +15,9 @@ import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeS
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
 
 import de.heidelberg.collectionsexplorer.beans.GenericInfo;
+import de.heidelberg.collectionsexplorer.context.Report;
+import de.heidelberg.collectionsexplorer.context.VisitorReportContext;
+import de.heidelberg.collectionsexplorer.context.VisitorType;
 import de.heidelberg.collectionsexplorer.writer.CsvWriter;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;

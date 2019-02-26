@@ -1,5 +1,6 @@
 package de.heidelberg.collectionsexplorer.beans;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -16,13 +17,19 @@ public class StringListInfo {
 	@Getter final List<String> listedInfo;
 	
 	public StringListInfo() {
-		listedInfo = Collections.emptyList();
+		listedInfo = new ArrayList<>();
 	}
 	
 	public StringListInfo(List<String> argumentTypes) {
 		super();
 		this.listedInfo = argumentTypes;
 	}
+	
+	public void add(String str) {
+		this.listedInfo.add(str);
+	}
+	
+	
 
 	@Override
 	public String toString() {
