@@ -25,17 +25,10 @@ public class TypeSolverTest {
 			TypeSolver typeSolver = new JavaParserTypeSolver(
 					new File("src/test/java/de/heidelberg/collectionsexplorer"));
 
-			
-			
 			SymbolReference<ResolvedReferenceTypeDeclaration> tryToSolveType = typeSolver
 					.tryToSolveType("TypeSolverTest");
 			assertTrue(tryToSolveType.isSolved());
 			
-			
-			SymbolReference<ResolvedReferenceTypeDeclaration> tryToSolveType2 = typeSolver
-					.tryToSolveType("shadowList");
-			assertTrue(tryToSolveType2.isSolved());
-
 		} catch (Exception e) {
 			System.out.println(e);
 			assertTrue(false);
@@ -43,39 +36,5 @@ public class TypeSolverTest {
 
 	}
 	
-	@Test
-	public void testTypeSolverInProjectDir() {
-
-		try {
-			TypeSolver typeSolver = new JavaParserTypeSolver(
-					new File("src/"));
-
-			SymbolReference<ResolvedReferenceTypeDeclaration> tryToSolveType = typeSolver
-					.tryToSolveType("TypeSolverTest");
-			//assertTrue(tryToSolveType.isSolved());
-
-		} catch (Exception e) {
-			System.out.println(e);
-			assertTrue(false);
-		}
-
-	}
-	
-	@Test
-	public void testReflectionTypeSolverInProjectDir() {
-
-		try {
-			TypeSolver typeSolver = new ReflectionTypeSolver();
-
-			SymbolReference<ResolvedReferenceTypeDeclaration> tryToSolveType = typeSolver
-					.tryToSolveType("TypeSolverTest");
-			assertTrue(tryToSolveType.isSolved());
-
-		} catch (Exception e) {
-			System.out.println(e);
-			assertTrue(false);
-		}
-
-	}
 
 }
