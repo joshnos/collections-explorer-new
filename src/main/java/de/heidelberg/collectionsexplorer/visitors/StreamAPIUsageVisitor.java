@@ -5,8 +5,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.pmw.tinylog.Logger;
+
+import com.github.javaparser.ast.Node;
+import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
+import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import com.github.javaparser.resolution.types.ResolvedType;
 import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade;
@@ -17,6 +22,7 @@ import de.heidelberg.collectionsexplorer.beans.StreamOperationsInfo;
 import de.heidelberg.collectionsexplorer.beans.StreamOperationsInfo.StreamOperationsInfoBuilder;
 import de.heidelberg.collectionsexplorer.beans.StringListInfo;
 import de.heidelberg.collectionsexplorer.context.Result;
+import de.heidelberg.collectionsexplorer.util.ParserUtil;
 
 public class StreamAPIUsageVisitor extends VoidVisitorAdapter<Result<StreamOperationsInfo>> {
 
@@ -45,7 +51,7 @@ public class StreamAPIUsageVisitor extends VoidVisitorAdapter<Result<StreamOpera
 			result.add(info);
 		}
 
-		// Get parallelstream operations
+		// Get parallel stream operations
 		StreamOperationsInfo parallelInfo = extractStreamOperations(n, allExpCalls, PARALLEL_STREAM);
 		if (parallelInfo != null) {
 			result.add(parallelInfo);
@@ -64,11 +70,18 @@ public class StreamAPIUsageVisitor extends VoidVisitorAdapter<Result<StreamOpera
 			
 			StreamOperationsInfoBuilder builder = StreamOperationsInfo.builder();
 			
-			// Extract the entire chain
+			// Class Name
+			builder.className(ParserUtil.retrieveClass(n));
+			
+			// Position (line + col)
+			builder.lineNumber(ParserUtil.getLineNumber(n));
+			builder.columnNumber(ParserUtil.getColumn(n));
+			
+			// Stream chain operations
 			StringListInfo chain = extractMethodChain(n, streamAnchor);
 			builder.streamOperations(chain);
 
-			// Extract the type
+			// Source type
 			Optional<Expression> scope = streamMethodCall.get().getScope();
 			String type = extractType(scope);
 			builder.sourceType(type);
@@ -106,7 +119,8 @@ public class StreamAPIUsageVisitor extends VoidVisitorAdapter<Result<StreamOpera
 				return rt.describe();
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			// Trace level as this is expected to happen quite often
+			Logger.trace(String.format("Error while identifying the types for the scope = %s", scope.get().toString()));
 		}
 		return UNKNOWN_TYPE;
 	}

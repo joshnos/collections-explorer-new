@@ -15,6 +15,7 @@ import de.heidelberg.collectionsexplorer.beans.StringListInfo;
 import de.heidelberg.collectionsexplorer.beans.VariableDeclarationInfo;
 import de.heidelberg.collectionsexplorer.beans.VariableDeclarationInfo.VariableDeclarationInfoBuilder;
 import de.heidelberg.collectionsexplorer.context.Result;
+import de.heidelberg.collectionsexplorer.util.ParserUtil;
 
 public class VariableDeclarationVisitor extends VoidVisitorAdapter<Result<VariableDeclarationInfo>> {
 	
@@ -39,18 +40,22 @@ public class VariableDeclarationVisitor extends VoidVisitorAdapter<Result<Variab
 		
 		VariableDeclarationInfoBuilder builder = VariableDeclarationInfo.builder();
 		
+		// Type
 		builder.type(exp.getTypeAsString());
+		
+		// Name
 		builder.name(exp.getNameAsString());
 		
+		// Class Name
+		builder.className(ParserUtil.retrieveClass(exp));
+		
+		// Type Arguments
 		builder.typeArguments(new StringListInfo(retrieveTypeArguments(exp)));
 		
-		Optional<Range> range = exp.getRange();
-		if(range.isPresent()) {
-			Position pos = range.get().begin;
-			builder.lineNumber(pos.line);
-			builder.columnNumber(pos.column);
-		}
-		
+		// Position (line + col)
+		builder.lineNumber(ParserUtil.getLineNumber(exp));
+		builder.columnNumber(ParserUtil.getColumn(exp));
+
 		return builder.build();
 	}
 

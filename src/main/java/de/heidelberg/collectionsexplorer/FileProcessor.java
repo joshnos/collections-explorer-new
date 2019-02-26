@@ -39,6 +39,7 @@ public class FileProcessor {
 	public FileProcessor(Filter filter) throws IOException {
 		super();
 		this.filter = filter;
+		this.visitorCtxs = new EnumMap<>(VisitorType.class);
 	}
 
 
