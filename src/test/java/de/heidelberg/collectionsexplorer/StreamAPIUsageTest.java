@@ -8,6 +8,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import com.github.javaparser.JavaParser;
+import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.symbolsolver.JavaSymbolSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
@@ -15,7 +16,7 @@ import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeS
 
 import de.heidelberg.collectionsexplorer.beans.StreamOperationsInfo;
 import de.heidelberg.collectionsexplorer.context.Result;
-import de.heidelberg.collectionsexplorer.visitors.StreamAPIUsageVisitor;
+import de.heidelberg.collectionsexplorer.visitors.StreamProductionSideVisitor;
 
 public class StreamAPIUsageTest {
 
@@ -33,7 +34,7 @@ public class StreamAPIUsageTest {
 	public void parsingClassAStreamAPIUsage() {
 
 		try {
-			CompilationUnit compilationUnit = JavaParser.parse(classA);
+			CompilationUnit compilationUnit = StaticJavaParser.parse(classA);
 			Result<StreamOperationsInfo> result = new Result<>("");
 
 			// Set up a minimal type solver that only looks at the classes used to run this
@@ -43,9 +44,9 @@ public class StreamAPIUsageTest {
 
 			// Configure JavaParser to use type resolution
 			JavaSymbolSolver symbolSolver = new JavaSymbolSolver(combinedTypeSolver);
-			JavaParser.getStaticConfiguration().setSymbolResolver(symbolSolver);
+			StaticJavaParser.getConfiguration().setSymbolResolver(symbolSolver);
 
-			compilationUnit.accept(new StreamAPIUsageVisitor(Filter.NO_FILTER), result);
+			compilationUnit.accept(new StreamProductionSideVisitor(Filter.NO_FILTER), result);
 
 			StreamOperationsInfo entries = result.getEntries().get(0);
 			

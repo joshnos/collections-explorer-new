@@ -10,6 +10,8 @@ import java.util.List;
 import org.pmw.tinylog.Logger;
 
 import com.github.javaparser.JavaParser;
+import com.github.javaparser.ParseResult;
+import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.symbolsolver.model.resolution.TypeSolver;
 
@@ -55,13 +57,14 @@ public class FileProcessor {
 	 * 		The {@link Result} object containing the info of the file or <code>null</code> 
 	 * in case of any {@link Exception} in the parse 
 	 */
+	
 	public void process(File f) { 
 
 		try(FileInputStream in = new FileInputStream(f.getAbsolutePath())){
 			CompilationUnit cu;
 			try {
-				cu = JavaParser.parse(in, Charset.forName(UTF_8));
-				
+				cu = StaticJavaParser.parse(in);
+				//Logger.info(f.getAbsolutePath());
 				for(VisitorReportContext<?> ctx : visitorCtxs.values()) {
 					ctx.inspect(cu, f.getAbsolutePath());
 				}
@@ -73,13 +76,14 @@ public class FileProcessor {
 		} catch (Exception e) {
 			// We can ignore small errors here
 			Logger.error(String.format("Error while processing the file %s.", f.getName()));
+			Logger.info("error" + e);
 		}
 	}
 	
 	/**
 	 * Process a List of Files
 	 * @param filesList
-	 * @param solver 
+	 * //@param solver
 	 */
 	public void process(List<File> filesList) {
 		

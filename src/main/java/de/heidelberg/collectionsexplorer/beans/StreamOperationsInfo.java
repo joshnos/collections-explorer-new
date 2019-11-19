@@ -16,9 +16,9 @@ public class StreamOperationsInfo extends GenericInfo {
 	
 	@Getter	@CsvBindByName private String sourceType;
 	@Getter @CsvBindByName private StringListInfo streamOperations;
-	@Getter @CsvBindByName private StringListInfo argumentTypes;
+	@Getter @CsvBindByName private String lastVisitMethodSignature;
+	@Getter @CsvBindByName private String lastConstructorSignature;
+	@Getter @CsvBindByName private String lastClassOrInterfaceSignature;
 	
 	@Getter @CsvBindByName private String fullStreamOperation;
-	
-
 }

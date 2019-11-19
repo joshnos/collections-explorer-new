@@ -9,6 +9,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import com.github.javaparser.JavaParser;
+import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 
 import de.heidelberg.collectionsexplorer.beans.ObjectCreationInfo;
@@ -34,7 +35,7 @@ public class ObjectCreationVisitorTest {
 
 		try {
 
-			CompilationUnit compilationUnit = JavaParser.parse(classA);
+			CompilationUnit compilationUnit = StaticJavaParser.parse(classA);
 			Result<ObjectCreationInfo> result = new Result<>("");
 			compilationUnit.accept(new ObjectCreationVisitor(Filter.NO_FILTER), result);
 
@@ -74,7 +75,7 @@ public class ObjectCreationVisitorTest {
 		
 		try {
 			
-			CompilationUnit compilationUnit = JavaParser.parse(classA);
+			CompilationUnit compilationUnit = StaticJavaParser.parse(classA);
 			Result<ObjectCreationInfo> result = new Result<>("");
 			
 			Filter filter = new Filter();

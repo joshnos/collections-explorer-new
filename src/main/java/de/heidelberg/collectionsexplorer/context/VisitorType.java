@@ -3,15 +3,10 @@ package de.heidelberg.collectionsexplorer.context;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import com.github.javaparser.symbolsolver.model.resolution.TypeSolver;
 
+import de.heidelberg.collectionsexplorer.CollectionsExplorer;
 import de.heidelberg.collectionsexplorer.Filter;
-import de.heidelberg.collectionsexplorer.beans.ImportDeclarationInfo;
-import de.heidelberg.collectionsexplorer.beans.ObjectCreationInfo;
-import de.heidelberg.collectionsexplorer.beans.StreamOperationsInfo;
-import de.heidelberg.collectionsexplorer.beans.VariableDeclarationInfo;
-import de.heidelberg.collectionsexplorer.visitors.ImportDeclarationVisitor;
-import de.heidelberg.collectionsexplorer.visitors.ObjectCreationVisitor;
-import de.heidelberg.collectionsexplorer.visitors.StreamAPIUsageVisitor;
-import de.heidelberg.collectionsexplorer.visitors.VariableDeclarationVisitor;
+import de.heidelberg.collectionsexplorer.beans.*;
+import de.heidelberg.collectionsexplorer.visitors.*;
 
 @SuppressWarnings("unchecked")
 public enum VisitorType {
@@ -39,20 +34,31 @@ public enum VisitorType {
 		}
 	},
 	
-	STREAM_API_USAGE("stream-api-usage.csv") {
+	STREAM_API_USAGE_KEY_WORD("stream-api-usage-key-word-" + CollectionsExplorer.projectName + ".csv") {
+		@Override
+		public VoidVisitorAdapter<Result<StreamByKeyWordInfo>>  getInstance(Filter filter) {
+			return new StreamKeyWordVisitor(filter);
+		}
+	},
+	
+	STREAM_API_USAGE_TYPE("stream-api-usage-type-" + CollectionsExplorer.projectName + ".csv") {
 		@Override
 		public VoidVisitorAdapter<Result<StreamOperationsInfo>>  getInstance(Filter filter) {
-			return new StreamAPIUsageVisitor(filter);
+			return new StreamProductionSideVisitor(filter);
+		}
+	},
+	
+	METHOD_TYPE("methods-types-" + CollectionsExplorer.projectName + ".csv") {
+		@Override
+		public VoidVisitorAdapter<Result<MethodCallsInfo>>  getInstance(Filter filter) {
+			return new MethodCallsVisitor(filter);
 		}
 	};
-	
-	public abstract <T> VoidVisitorAdapter<T> getInstance(Filter filter);
+
+    public abstract <T> VoidVisitorAdapter<T> getInstance(Filter filter);
 	public String outputFile;
 	
 	private VisitorType(String outputFile) {
 		this.outputFile = outputFile;
-	}
-
-	
-	
+	}	
 }

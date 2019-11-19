@@ -6,6 +6,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import com.github.javaparser.JavaParser;
+import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.symbolsolver.JavaSymbolSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
@@ -34,7 +35,7 @@ public class SimpleStreamParsingTest {
 			
 	        // Configure JavaParser to use type resolution
 	        JavaSymbolSolver symbolSolver = new JavaSymbolSolver(solver);
-	        JavaParser.getStaticConfiguration().setSymbolResolver(symbolSolver);
+	        StaticJavaParser.getConfiguration().setSymbolResolver(symbolSolver);
 			
 		} catch (Exception e) {
 			System.out.println(e);

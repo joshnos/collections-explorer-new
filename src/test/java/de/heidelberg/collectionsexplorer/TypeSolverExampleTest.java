@@ -4,6 +4,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import com.github.javaparser.JavaParser;
+import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.BinaryExpr;
 import com.github.javaparser.resolution.types.ResolvedType;
@@ -31,10 +32,10 @@ public class TypeSolverExampleTest {
 
         // Configure JavaParser to use type resolution
         JavaSymbolSolver symbolSolver = new JavaSymbolSolver(combinedTypeSolver);
-        JavaParser.getStaticConfiguration().setSymbolResolver(symbolSolver);
+        StaticJavaParser.getConfiguration().setSymbolResolver(symbolSolver);
 
         // Parse some code
-        CompilationUnit cu = JavaParser.parse("class X { int x() { return 1 + 1.0 - 5; } }");
+        CompilationUnit cu = StaticJavaParser.parse("class X { int x() { return 1 + 1.0 - 5; } }");
 
         // Find all the calculations with two sides:
         cu.findAll(BinaryExpr.class).forEach(be -> {

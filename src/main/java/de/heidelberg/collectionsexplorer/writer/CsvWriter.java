@@ -15,8 +15,8 @@ public class CsvWriter {
 
 		try (Writer writer = new FileWriter(toWrite)) {
 			StatefulBeanToCsv<T> sbc = new StatefulBeanToCsvBuilder<T>(writer)
-					.withSeparator(CSVWriter.DEFAULT_SEPARATOR).build();
-
+					.withSeparator(',').build();
+			
 			sbc.write(infoList);
 		}
 	}

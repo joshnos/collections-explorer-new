@@ -1,16 +1,27 @@
 package de.heidelberg.collectionsexplorer;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Properties;
 import java.util.concurrent.Callable;
 
+import org.pmw.tinylog.Configurator;
+import org.pmw.tinylog.Level;
 import org.pmw.tinylog.Logger;
+import org.pmw.tinylog.writers.ConsoleWriter;
+import org.pmw.tinylog.writers.FileWriter;
+import org.pmw.tinylog.writers.Writer;
 
 import com.github.javaparser.JavaParser;
+import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.symbolsolver.JavaSymbolSolver;
 import com.github.javaparser.symbolsolver.model.resolution.TypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
@@ -38,13 +49,16 @@ import picocli.CommandLine.Parameters;
 @Command(description = "Finds and parses Java code inside a directory and retrieve information about the collections usage.", name = "Collections-Explorer", mixinStandardHelpOptions = true, version = "1.0")
 public class CollectionsExplorer implements Callable<Void> {
 
+	public static int unknownCounter = 0;
+	public static int totalCounter = 0;
 	private static final String JAVA_EXTENSION = ".java";
 
 	/**
 	 * INPUT PARAMETERS
 	 */
 
-	@Parameters(index = "0", arity = "1..*", paramLabel = "dir", description = "Input directory where the explorer will retrieve collections usage")
+	@Parameters(index = "0", arity = "1..*", paramLabel = "dir",
+			description = "Input directory where the explorer will retrieve collections usage")
 	private File[] inputDirectories;
 
 	/**
@@ -76,9 +90,17 @@ public class CollectionsExplorer implements Callable<Void> {
 			description = "Analyze every import declaration that matches the filter.")
 	private boolean inspectImportDeclaration;
 
-	@Option(arity = "0", names = {"-stream" }, paramLabel = "stream", 
+	@Option(arity = "0", names = {"-streamByKeyWord" }, paramLabel = "streamByKeyWord", 
 			description = "Analyze every stream methods	 declaration using the filter.")
-	private boolean inspectStreamMethodDeclaration;
+	private boolean inspectStreamByKeyWordMethodDeclaration;
+	
+	@Option(arity = "0", names = {"-streamByType" }, paramLabel = "streamByType", 
+			description = "Analyze every stream methods	 declaration using the filter.")
+	private boolean inspectStreamByTypeMethodDeclaration;
+	
+	@Option(arity = "0", names = {"-type" }, paramLabel = "type", 
+			description = "Extract type from all methods")
+	private boolean inspectMethodsType;
 	
 	/**
 	 * TYPE SOLVER PARAMETERS
@@ -87,8 +109,15 @@ public class CollectionsExplorer implements Callable<Void> {
 			description = "Jar file to help resolve symbol types (stream usage).")
 	private File jarFile;
 	
-
-	public static void main(String[] args) {
+	@Option(arity = "0", names = {"-projectName" }, paramLabel = "projectName", 
+			description = "name of the project analyzed.")
+	public static String projectName;
+	
+	@Option(arity = "0", names = {"-jarsFile" }, paramLabel = "jarsFile", 
+			description = "file where are jars for the project")
+	public static String jarsFile;
+	
+	public static void main(String[] args) throws IOException {
 
 		// CheckSum implements Callable, so parsing, error handling and handling user
 		// requests for usage help or version help can be done with one line of code.
@@ -97,7 +126,11 @@ public class CollectionsExplorer implements Callable<Void> {
 
 	@Override
 	public Void call() throws Exception {
-
+		Configurator.defaultConfig()
+		   .writer(new ConsoleWriter(), Level.INFO)
+		   .addWriter(new FileWriter(projectName + ".txt"), Level.TRACE)
+		   .activate();
+		
 		Logger.info("Starting the Collections-Explorer");
 
 		Filter filter = new Filter();
@@ -122,12 +155,16 @@ public class CollectionsExplorer implements Callable<Void> {
 			for (File dir : inputDirectories) {
 				Logger.info(String.format("Adding directory %s", dir.getPath()));
 				filesList.addAll(FileTraverser.visitAllDirsAndFiles(dir, JAVA_EXTENSION));
-
+				
+				
 				CombinedTypeSolver solver = new CombinedTypeSolver(
 						//new JavaParserTypeSolver(dir), // Needs an accurate root directory THIS IS VERY SLOW
 						new ReflectionTypeSolver());   // Works for types we also use here (java.util, java.lang...)
-
-				
+				FileTraverser.fillDirectories(dir, solver);
+				if(jarsFile != null) {
+					Logger.info(String.format("Jar file %s specified for the type solver.", jarsFile));
+					FileTraverser.fillJar(new File(jarsFile), solver);
+				}
 				
 				if(jarFile != null) {
 					solver.add(new JarTypeSolver(jarFile));
@@ -136,13 +173,16 @@ public class CollectionsExplorer implements Callable<Void> {
 				
 				// Configure JavaParser to use type resolution
 				JavaSymbolSolver symbolSolver = new JavaSymbolSolver(solver);
-				JavaParser.getStaticConfiguration().setSymbolResolver(symbolSolver);
+				StaticJavaParser.getConfiguration().setSymbolResolver(symbolSolver);
 
 				Logger.info(String.format("%d files found...", filesList.size()));
 				processor.process(filesList);
-
+				//System.out.println(dir.toString());
 			}
 
+			Logger.trace("Total types: " + totalCounter);
+			Logger.trace("Undefined types: " + unknownCounter);
+			Logger.trace("Percentage Of Undefined Types: " + getPercentageOfUndefinedTypes(totalCounter, unknownCounter) + "%");
 			Logger.info("All files processed, preparing the export");
 
 			EnumMap<VisitorType, VisitorReportContext<?>> allVisitorContexts = processor.getAllVisitorContexts();
@@ -163,7 +203,7 @@ public class CollectionsExplorer implements Callable<Void> {
 					outputFile = new File(outputDirectory + visitorType.outputFile);
 				}
 
-				// Writ in a CSV file
+				// Write in a CSV file
 				CsvWriter.writeInfo(outputFile, formatToWrite(context.getReport()));
 
 			}
@@ -195,9 +235,19 @@ public class CollectionsExplorer implements Callable<Void> {
 			processor.addVisitorContext(VisitorType.OBJECT_CREATION);
 		}
 
-		if (inspectStreamMethodDeclaration) {
-			Logger.info(String.format("Inspecting STREAM-API-USAGE"));
-			processor.addVisitorContext(VisitorType.STREAM_API_USAGE);
+		if (inspectStreamByKeyWordMethodDeclaration) {
+			Logger.info(String.format("Inspecting STREAM-API-USAGE-KEY-WORD"));
+			processor.addVisitorContext(VisitorType.STREAM_API_USAGE_KEY_WORD);
+		}
+		
+		if (inspectStreamByTypeMethodDeclaration) {
+			Logger.info(String.format("Inspecting STREAM-API-USAGE-TYPE"));
+			processor.addVisitorContext(VisitorType.STREAM_API_USAGE_TYPE);
+		}
+		
+		if (inspectMethodsType) {
+			Logger.info(String.format("Inspecting METHOD-TYPE"));
+			processor.addVisitorContext(VisitorType.METHOD_TYPE);
 		}
 
 		return processor;
@@ -213,5 +263,10 @@ public class CollectionsExplorer implements Callable<Void> {
 
 		return returnedList;
 	}
-
+	
+	private String getPercentageOfUndefinedTypes(int total, int undefined) {
+		DecimalFormat formato = new DecimalFormat("#.##");
+		float result = undefined * 100.00f / total;
+		return formato.format(result);
+	}
 }

@@ -6,6 +6,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import com.github.javaparser.JavaParser;
+import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 
 import de.heidelberg.collectionsexplorer.beans.VariableDeclarationInfo;
@@ -28,7 +29,7 @@ public class VariableDeclarationVisitorTest {
 	@Test
 	public void testSimpleParsing() {
 		
-		CompilationUnit compilationUnit = JavaParser.parse(classA);
+		CompilationUnit compilationUnit = StaticJavaParser.parse(classA);
 		Result<VariableDeclarationInfo> result = new Result<>("");
 		compilationUnit.accept(new VariableDeclarationVisitor(Filter.NO_FILTER), result);
 		

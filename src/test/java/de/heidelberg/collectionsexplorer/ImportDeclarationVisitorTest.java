@@ -6,6 +6,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import com.github.javaparser.JavaParser;
+import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 
 import de.heidelberg.collectionsexplorer.beans.ImportDeclarationInfo;
@@ -38,7 +39,7 @@ public class ImportDeclarationVisitorTest {
 	@Test
 	public void testSimpleImportExtraction() {
 		
-		CompilationUnit compilationUnit = JavaParser.parse(classA);
+		CompilationUnit compilationUnit = StaticJavaParser.parse(classA);
 		Result<ImportDeclarationInfo> result = new Result<>("");
 		compilationUnit.accept(new ImportDeclarationVisitor(Filter.NO_FILTER), result);
 		
@@ -53,7 +54,7 @@ public class ImportDeclarationVisitorTest {
 	@Test
 	public void testSimpleImportExtractionWithFilter() {
 		
-		CompilationUnit compilationUnit = JavaParser.parse(classA);
+		CompilationUnit compilationUnit = StaticJavaParser.parse(classA);
 		Result<ImportDeclarationInfo> result = new Result<>("");
 		Filter filter = new Filter();
 		filter.add(".*Map<.*>");
@@ -71,7 +72,7 @@ public class ImportDeclarationVisitorTest {
 	@Test
 	public void testJavaUtilImport() {
 		
-		CompilationUnit compilationUnit = JavaParser.parse(classB);
+		CompilationUnit compilationUnit = StaticJavaParser.parse(classB);
 		Result<ImportDeclarationInfo> result = new Result<>("");
 		Filter filter = new Filter();
 		filter.add("java.util");

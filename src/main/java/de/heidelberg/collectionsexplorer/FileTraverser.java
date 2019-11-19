@@ -1,8 +1,13 @@
 package de.heidelberg.collectionsexplorer;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
+import com.github.javaparser.symbolsolver.resolution.typesolvers.JarTypeSolver;
+import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver;
 
 /**
  * FileTraverser provides the logic for traversing files in a directory.
@@ -34,5 +39,24 @@ public class FileTraverser {
 			}
 		}
 		return files;
+	}
+	
+	public static void fillDirectories(File file, CombinedTypeSolver solver) {
+
+		solver.add(new JavaParserTypeSolver(file.getPath()));
+		for(File f : file.listFiles()) {
+			if(f.isDirectory()) {
+				fillDirectories(f, solver);
+			}
+		}
+	}
+	
+	public static void fillJar(File file, CombinedTypeSolver solver) throws IOException {
+
+		for(File f : file.listFiles()) {
+			if(f.getName().endsWith(".jar")) {
+				solver.add(new JarTypeSolver(f.getPath()));
+			}
+		}
 	}
 }

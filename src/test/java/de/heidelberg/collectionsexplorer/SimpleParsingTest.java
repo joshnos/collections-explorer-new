@@ -9,6 +9,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import com.github.javaparser.JavaParser;
+import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 
@@ -20,7 +21,7 @@ public class SimpleParsingTest {
 
 		try {
 
-			CompilationUnit compilationUnit = JavaParser
+			CompilationUnit compilationUnit = StaticJavaParser
 					.parse("class A { " + "private int field1;" + "private float field2;" + "}");
 
 			Optional<ClassOrInterfaceDeclaration> classA = compilationUnit.getClassByName("A");
