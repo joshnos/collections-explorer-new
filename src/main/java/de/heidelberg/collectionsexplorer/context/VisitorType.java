@@ -47,6 +47,13 @@ public enum VisitorType {
 			return new StreamProductionSideVisitor(filter);
 		}
 	},
+
+	STREAM_API_METRICS_TYPE("stream-api-metrics-type-" + CollectionsExplorer.projectName + ".csv") {
+		@Override
+		public VoidVisitorAdapter<Result<StreamTypeInfo>>  getInstance(Filter filter) {
+			return new StreamTypeVisitor(filter);
+		}
+	},
 	
 	METHOD_TYPE("methods-types-" + CollectionsExplorer.projectName + ".csv") {
 		@Override

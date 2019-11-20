@@ -97,6 +97,10 @@ public class CollectionsExplorer implements Callable<Void> {
 	@Option(arity = "0", names = {"-streamByType" }, paramLabel = "streamByType", 
 			description = "Analyze every stream methods	 declaration using the filter.")
 	private boolean inspectStreamByTypeMethodDeclaration;
+
+	@Option(arity = "0", names = {"-streamTypeMetrics" }, paramLabel = "streamTypeMetrics",
+			description = "Analyze every stream methods	 declaration using the filter.")
+	private boolean inspectsStreamTypeMetricsMethodDeclaration;
 	
 	@Option(arity = "0", names = {"-type" }, paramLabel = "type", 
 			description = "Extract type from all methods")
@@ -243,6 +247,11 @@ public class CollectionsExplorer implements Callable<Void> {
 		if (inspectStreamByTypeMethodDeclaration) {
 			Logger.info(String.format("Inspecting STREAM-API-USAGE-TYPE"));
 			processor.addVisitorContext(VisitorType.STREAM_API_USAGE_TYPE);
+		}
+
+		if (inspectsStreamTypeMetricsMethodDeclaration) {
+			Logger.info(String.format("Inspecting STREAM-API-METRICS-TYPE"));
+			processor.addVisitorContext(VisitorType.STREAM_API_METRICS_TYPE);
 		}
 		
 		if (inspectMethodsType) {

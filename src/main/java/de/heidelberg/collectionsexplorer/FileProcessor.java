@@ -71,12 +71,13 @@ public class FileProcessor {
 				
 			} catch (Error e) {
 				Logger.error(String.format("Critical Javaparser error while processing the file %s.", f.getName()));
+				Logger.error("error" + e);
 			}
 			
 		} catch (Exception e) {
 			// We can ignore small errors here
 			Logger.error(String.format("Error while processing the file %s.", f.getName()));
-			Logger.info("error" + e);
+			Logger.error("error" + e);
 		}
 	}
 	
