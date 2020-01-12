@@ -5,7 +5,6 @@ import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import com.github.javaparser.resolution.types.ResolvedType;
 import de.heidelberg.collectionsexplorer.Filter;
-import de.heidelberg.collectionsexplorer.beans.StreamByKeyWordInfo;
 import de.heidelberg.collectionsexplorer.beans.StreamTypeInfo;
 import de.heidelberg.collectionsexplorer.beans.StreamTypeInfo.StreamTypeInfoBuilder;
 import de.heidelberg.collectionsexplorer.context.Result;
@@ -31,17 +30,12 @@ public class StreamTypeVisitor extends VoidVisitorAdapter<Result<StreamTypeInfo>
 
     @Override
     public void visit(final MethodCallExpr call, final Result<StreamTypeInfo> result) {
-        System.out.println(call.getNameAsString());
         String returnType = extractType(call);
-        System.out.println(returnType);
         String scopeType = extractType(call.getScope());
-        System.out.println(scopeType);
         boolean streamKeyword = call.getNameAsString().contentEquals(STREAM) ||
                 call.getNameAsString().contentEquals(PARALLEL_STREAM) ||
                 call.getNameAsString().contentEquals(OF);
-        System.out.println(streamKeyword);
         if(streamKeyword || isStream(returnType) || isStream(scopeType)){
-            System.out.println("is stream");
             result.add(buildResult(call, returnType, scopeType));
         }
         super.visit(call, result);

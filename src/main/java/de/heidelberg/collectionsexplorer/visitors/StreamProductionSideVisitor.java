@@ -52,17 +52,23 @@ public class StreamProductionSideVisitor extends VoidVisitorAdapter<Result<Strea
 	public void visit(final MethodCallExpr n, final Result<StreamOperationsInfo> result) {
 		Boolean v = get(n)==null;
 		if(v) {
-			StreamOperationsInfo info = extractStreamOperations(n);
 			List<MethodCallExpr> allExpCalls = n.findAll(MethodCallExpr.class);
-			countRecognizedMethodTypes(allExpCalls);
-			//countRecognizedMethodTypes(n);
-			if (info != null) {
-				result.add(info);
+			Boolean haveStream = allExpCalls.stream()
+					.anyMatch(this::returnsStreamType);
+			if (haveStream) {
+				StreamOperationsInfo info = extractStreamOperations(n);
+				if (info != null) {
+					result.add(info);
+				}
 			}
 		}
 		super.visit(n, result);
 	}
-	
+
+	private boolean returnsStreamType(MethodCallExpr x) {
+		return extractType(x).contains("java.util.stream");
+	}
+
 	@Override
 	public void visit(final MethodDeclaration n, final Result<StreamOperationsInfo>  result) {
 		lastVisitMethodSignature = n.getSignature().asString();
@@ -85,9 +91,9 @@ public class StreamProductionSideVisitor extends VoidVisitorAdapter<Result<Strea
 	}
 	
 	private StreamOperationsInfo extractStreamOperations(MethodCallExpr methodCall) {
-			StreamOperationsInfoBuilder builder = StreamOperationsInfo.builder();
+		StreamOperationsInfoBuilder builder = StreamOperationsInfo.builder();
 		LinkedList<String> list = extractChainByType(methodCall, builder);
-			
+
 			if(list.size()>0) {
 				// FullStreamCall
 				builder.fullStreamOperation(methodCall.toString());
@@ -148,7 +154,7 @@ public class StreamProductionSideVisitor extends VoidVisitorAdapter<Result<Strea
 					result.add(call.getName().getIdentifier());
 					builder.sourceType(receiverType);
 				}
-			}else{
+			}else {
 				// then is not related to streams
 			}
 		}
@@ -226,21 +232,5 @@ public class StreamProductionSideVisitor extends VoidVisitorAdapter<Result<Strea
 			Logger.trace(String.format("Error while identifying the types for the expresion = %s", expression.toString()));
 		}
 		return UNKNOWN_TYPE;
-	}
-	
-	private void countRecognizedMethodTypes(List<MethodCallExpr> listOfCalls) {
-		listOfCalls.forEach(call -> {
-			if(extractType(call).contains("UNK")) {
-				CollectionsExplorer.unknownCounter ++;
-				//System.out.println(call.toString());
-			}
-			CollectionsExplorer.totalCounter ++;
-		});
-	}
-	
-	private void countRecognizedMethodTypes(MethodCallExpr call) {
-		if(extractType(call).contains("UNK")) 
-			CollectionsExplorer.unknownCounter ++;
-		CollectionsExplorer.totalCounter ++;
 	}
 }

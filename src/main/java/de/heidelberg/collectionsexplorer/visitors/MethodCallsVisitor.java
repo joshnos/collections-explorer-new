@@ -54,6 +54,7 @@ public class MethodCallsVisitor extends VoidVisitorAdapter<Result<MethodCallsInf
 		} catch (Exception e) {
 			// Trace level as this is expected to happen quite often
 			Logger.trace(String.format("Error while identifying the types for the expresion = %s", expression.toString()));
+			Logger.trace(e.toString());
 		}
 		CollectionsExplorer.unknownCounter ++;
 		return UNKNOWN_TYPE;
